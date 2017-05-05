@@ -66,3 +66,18 @@
     (format str "                   It is ~A's turn!~%" 
 	    (if-black-turn g *black-show* *white-show*))
     ))
+
+
+
+;;  NEW-OTHELLO
+;; --------------------------------------
+;;  INPUTS:  None
+;;  OUTPUT:  An OTHELLO struct representing a new game
+
+(defun new-gomoku
+    ()
+  (let* ((game (make-gomoku :whose-turn *black*
+			     :num-open 60))
+	 (bored (gomoku-board game)))
+    game))
+
