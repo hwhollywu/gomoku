@@ -6,9 +6,7 @@
   whose-turn
   ;; NUM-OPEN:  the number of open spaces on the BOARD (always <= 60)
   num-open
-  ;; WHITE-PIECES/BLACK-PIECES:  64-bit integers (as described above)
-  white-pieces 
-  black-pieces 
+  ;; num of open 3, open 4, etc.
   )
 
 
@@ -40,6 +38,31 @@
     ((game gomoku))
   (make-gomoku :board (copy-array (gomoku-board game))
 		:whose-turn (gomoku-whose-turn game)
-		:num-open (gomoku-num-open game)
-		:white-pieces (gomoku-white-pieces game)
-		:black-pieces (gomoku-black-pieces game)))
+		:num-open (gomoku-num-open game)))
+
+;;  PRINT-OTHELLO
+;; --------------------------------------------------
+;;  INPUTS:  G, an OTHELLO struct
+;;           STR, output stream (or T)
+;;           DEPTH, ignored
+;;  OUTPUT:  None
+;;  SIDE EFFECT:  Displays the OTHELLO game
+
+(defun print-othello
+    (g str d)
+  (declare (ignore d))
+  (let ((bored (othello-board g)))
+    (format str "~% |  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18~%")
+    (format str "---------------------------------------------------~%")
+    (dotimes (r 19)
+      (format str "~A| " r)
+      (dotimes (c 19)
+	(let ((token (aref bored r c)))
+	  (format str "~A  " (cond ((eq token *black*) *black-show*)
+				  ((eq token *white*) *white-show*)
+				  (t *blank-show*)))))
+      (format str "~%"))
+    (format str "~%")
+    (format str "                   It is ~A's turn!~%" 
+	    (if-black-turn g *black-show* *white-show*))
+    ))
