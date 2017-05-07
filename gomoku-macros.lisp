@@ -98,8 +98,7 @@
 
 ;;  PLACE-TOKEN
 ;; -------------------------------------------------------------------
-;;  INPUTS:  GAME, an GOMOKU struct
-;;           BORED, a 15-by-15 array
+;;  INPUTS:  BORED, a 15-by-15 array
 ;;           PLR, either *BLACK* or *WHITE*
 ;;           ROW, COL, integers between 0 and 14
 ;;  OUTPUT:  Doesn't matter
@@ -108,7 +107,7 @@
 ;;    (see the STATE struct)
 
 (defmacro place-token
-    (game bored plr row col)
+    (bored plr row col)
   `(progn (setf (aref ,bored ,row ,col) ,plr) ))
 ;;	  (if-black ,plr (incf (othello-black-pieces ,game)
 ;;			       (ash 1 (row-col->posn ,row ,col)))
