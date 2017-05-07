@@ -25,24 +25,24 @@
 
 ;;  POSN->ROW
 ;; ---------------------------------------------------------------------
-;;  INPUT:   POSN (i.e., an integer from 0 to 323)
-;;  OUTPUT:  The corresponding ROW (an integer from 0 to 18)
+;;  INPUT:   POSN (i.e., an integer from 0 to 224)
+;;  OUTPUT:  The corresponding ROW (an integer from 0 to 14)
 
-(defmacro posn->row (posn) `(floor ,posn 19))
+(defmacro posn->row (posn) `(floor ,posn 15))
 
 ;;  POSN->COL
 ;; ---------------------------------------------------------------
-;;  INPUT:   POSN (i.e., an integer from 0 to 323)
-;;  OUTPUT:  The corresponding COLUMN (an integer from 0 to 18)
+;;  INPUT:   POSN (i.e., an integer from 0 to 224)
+;;  OUTPUT:  The corresponding COLUMN (an integer from 0 to 14)
 
-(defmacro posn->col (posn) `(mod ,posn 19))
+(defmacro posn->col (posn) `(mod ,posn 15))
 
 ;;  ROW-COL->POSN
 ;; ------------------------------------------
-;;  INPUTS:  ROW, COL, two integers each between 0 and 18
-;;  OUTPUT:  The corresponding POSN (an integer between 0 and 323)
+;;  INPUTS:  ROW, COL, two integers each between 0 and 14
+;;  OUTPUT:  The corresponding POSN (an integer between 0 and 224)
 
-(defmacro row-col->posn (row col) `(+ (* 19 ,row) ,col))
+(defmacro row-col->posn (row col) `(+ (* 15 ,row) ,col))
 
 ;;  IF-BLACK-TURN
 ;; -------------------------------------------------------
@@ -85,9 +85,9 @@
 
 ;;  PLACE-TOKEN-AT-POSN
 ;; --------------------------------------------------------------
-;;  INPUTS:  BOARD, a 19-by-19 array
+;;  INPUTS:  BOARD, a 15-by-15 array
 ;;           TOKEN, either *BLACK* or *WHITE*
-;;           POSN, an integer from 0 to 323
+;;           POSN, an integer from 0 to 224
 ;;  OUTPUT:  Doesn't matter
 ;;  SIDE EFFECT:  Destructively modifies BOARD by inserting TOKEN
 ;;                at the position determined by POSN
@@ -99,9 +99,9 @@
 ;;  PLACE-TOKEN
 ;; -------------------------------------------------------------------
 ;;  INPUTS:  GAME, an GOMOKU struct
-;;           BORED, a 19-by-19 array
+;;           BORED, a 15-by-15 array
 ;;           PLR, either *BLACK* or *WHITE*
-;;           ROW, COL, integers between 0 and 18
+;;           ROW, COL, integers between 0 and 14
 ;;  OUTPUT:  Doesn't matter
 ;;  SIDE EFFECT:  Places TOKEN on BORED at specified ROW/COL.
 ;;    Also updates the 64-bit vector for the appropriate player
@@ -119,11 +119,13 @@
 ;; ------------------------------------------
 ;;  INPUTS:  ROW, COL, two integers
 ;;  OUTPUT:  T if (ROW,COL) does not specify a legal position
-;;              in a 19-by-19 array; NIL otherwise.
+;;              in a 15-by-15 array; NIL otherwise.
 
 (defmacro off-board?
     (row col)
   `(or (< ,row 0)
        (< ,col 0)
-       (> ,row 7)
-       (> ,col 7)))
+       (> ,row 14)
+       (> ,col 14)))
+
+

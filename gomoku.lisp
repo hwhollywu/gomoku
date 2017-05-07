@@ -4,21 +4,19 @@
 ;;  Lilian Zhao and Hao Wu
 ;; ========================================
 
-;; Defining a constant of direction vectors
-(defconstant directions #((0 -1) (-1 -1) (-1 0) (-1 1) 
-  (0 1) (1 1) (1 0) (1 -1)))
 
 ;;  The GOMOKU struct
 ;; --------------------------------------------------------
 
 (defstruct (gomoku (:print-function print-gomoku))
-  ;; BOARD:  a 19-by-19 array of *white*, *black* or *blank* 
-  (board (make-array '(19 19) :initial-element *blank*))      
+  ;; BOARD:  a 15-by-15 array of *white*, *black* or *blank* 
+  (board (make-array '(15 15) :initial-element *blank*))      
   ;; WHOSE-TURN:  either *BLACK* or *WHITE*
   whose-turn
   ;; NUM-OPEN:  the number of open spaces on the BOARD (always <= 60)
   num-open
-  ;; num of open 3, open 4, etc.
+  ;; NEW-POSN: the latest move
+  new-posn
   )
 
 
@@ -69,11 +67,11 @@
     (g str d)
   (declare (ignore d))
   (let ((bored (gomoku-board g)))
-    (format str "~% |  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18~%")
-    (format str "---------------------------------------------------~%")
-    (dotimes (r 19)
+    (format str "~% |  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14~%")
+    (format str "------------------------------------------------~%")
+    (dotimes (r 15)
       (format str "~A| " r)
-      (dotimes (c 19)
+      (dotimes (c 15)
 	(let ((token (aref bored r c)))
 	  (format str "~A  " (cond ((eq token *black*) *black-show*)
 				  ((eq token *white*) *white-show*)
@@ -85,16 +83,35 @@
     ))
 
 
-
-;;  NEW-OTHELLO
+;;  NEW-GOMOKU
 ;; --------------------------------------
 ;;  INPUTS:  None
-;;  OUTPUT:  An OTHELLO struct representing a new game
+;;  OUTPUT:  An GOMOKU struct representing a new game
 
 (defun new-gomoku
     ()
   (let* ((game (make-gomoku :whose-turn *black*
-			     :num-open 60))
+			     :num-open 225))
 	 (bored (gomoku-board game)))
     game))
 
+;;  Defines the following METHODS 
+;; ---------------------------------------------------------
+;;     IS-LEGAL?
+;;     DO-MOVE!  
+;;     RANDOM-MOVE
+;;     DO-RANDOM-MOVE!
+;;     LEGAL-MOVES 
+;;     GAME-OVER?  
+;;     DEFAULT-POLICY 
+;;     EVAL-FUNC
+
+
+;;  IS-LEGAL?
+;; -----------------------------------
+;;  INPUTS:  GAME, an GOMOKU struct
+;;           ROW, COL, integers
+;;  OUTPUT:  T if this is a legal move for PLAYER
+
+(defun is-legal? (game row col)
+  ()
