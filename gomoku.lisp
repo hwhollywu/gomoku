@@ -1,6 +1,15 @@
+;; ========================================
+;;  CMPU-365, Spring 2017
+;;  FILE:  gomoku.lisp
+;;  Lilian Zhao and Hao Wu
+;; ========================================
+
+
+;;  The GOMOKU struct
+;; --------------------------------------------------------
 
 (defstruct (gomoku (:print-function print-gomoku))
-  ;; BOARD:  an 8-by-8 array of *white*, *black* or *blank* 
+  ;; BOARD:  a 19-by-19 array of *white*, *black* or *blank* 
   (board (make-array '(19 19) :initial-element *blank*))      
   ;; WHOSE-TURN:  either *BLACK* or *WHITE*
   whose-turn
@@ -9,6 +18,11 @@
   ;; num of open 3, open 4, etc.
   )
 
+
+;;  WHOSE-TURN
+;; -----------------------------------------
+;;  INPUT:  GAME, an GOMOKU struct
+;;  OUTPUT: The player whose turn it is (*black* or *white*)
 
 (defmethod whose-turn
     ((game gomoku))
@@ -31,7 +45,7 @@
 
 ;;  COPY-GAME
 ;; ------------------------------------------
-;;  INPUT:   GAME, an OTHELLO struct
+;;  INPUT:   GAME, an GOMOKU struct
 ;;  OUTPUT:  A copy of GAME
 
 (defmethod copy-game
@@ -40,18 +54,18 @@
 		:whose-turn (gomoku-whose-turn game)
 		:num-open (gomoku-num-open game)))
 
-;;  PRINT-OTHELLO
+;;  PRINT-GOMOKU
 ;; --------------------------------------------------
-;;  INPUTS:  G, an OTHELLO struct
+;;  INPUTS:  G, an GOMOKU struct
 ;;           STR, output stream (or T)
 ;;           DEPTH, ignored
 ;;  OUTPUT:  None
-;;  SIDE EFFECT:  Displays the OTHELLO game
+;;  SIDE EFFECT:  Displays the GOMOKU game
 
-(defun print-othello
+(defun print-gomoku
     (g str d)
   (declare (ignore d))
-  (let ((bored (othello-board g)))
+  (let ((bored (gomoku-board g)))
     (format str "~% |  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18~%")
     (format str "---------------------------------------------------~%")
     (dotimes (r 19)

@@ -1,8 +1,7 @@
 ;; ===============================================
 ;;  CMPU-365, Spring 2017
-;;  FILE:  othello-macros.lisp
+;;  FILE:  gomoku-macros.lisp
 ;; ===============================================
-;;  Some macros that you may find useful when implementing OTHELLO!
 
 ;;  Some useful constants
 ;; -----------------------------------
@@ -20,30 +19,30 @@
 (defconstant *pass* '(nil nil))
 
 
-;;  A POSN is just a number from 0 to 63, that refers to one of the
-;;  squares on the 8-by-8 othello game board.  The following macros
+;;  A POSN is just a number from 0 to 323, that refers to one of the
+;;  squares on the 19-by-19 gomoku game board.  The following macros
 ;;  convert between the POSN and ROW/COL representations.
 
 ;;  POSN->ROW
 ;; ---------------------------------------------------------------------
-;;  INPUT:   POSN (i.e., an integer from 0 to 63)
-;;  OUTPUT:  The corresponding ROW (an integer from 0 to 7)
+;;  INPUT:   POSN (i.e., an integer from 0 to 323)
+;;  OUTPUT:  The corresponding ROW (an integer from 0 to 18)
 
-(defmacro posn->row (posn) `(floor ,posn 8))
+(defmacro posn->row (posn) `(floor ,posn 19))
 
 ;;  POSN->COL
 ;; ---------------------------------------------------------------
-;;  INPUT:   POSN (i.e., an integer from 0 to 63)
-;;  OUTPUT:  The corresponding COLUMN (an integer from 0 to 7)
+;;  INPUT:   POSN (i.e., an integer from 0 to 323)
+;;  OUTPUT:  The corresponding COLUMN (an integer from 0 to 18)
 
-(defmacro posn->col (posn) `(mod ,posn 8))
+(defmacro posn->col (posn) `(mod ,posn 19))
 
 ;;  ROW-COL->POSN
 ;; ------------------------------------------
-;;  INPUTS:  ROW, COL, two integers each between 0 and 7
-;;  OUTPUT:  The corresponding POSN (an integer between 0 and 63)
+;;  INPUTS:  ROW, COL, two integers each between 0 and 18
+;;  OUTPUT:  The corresponding POSN (an integer between 0 and 323)
 
-(defmacro row-col->posn (row col) `(+ (* 8 ,row) ,col))
+(defmacro row-col->posn (row col) `(+ (* 19 ,row) ,col))
 
 ;;  IF-BLACK-TURN
 ;; -------------------------------------------------------
@@ -86,9 +85,9 @@
 
 ;;  PLACE-TOKEN-AT-POSN
 ;; --------------------------------------------------------------
-;;  INPUTS:  BOARD, an 8-by-8 array
+;;  INPUTS:  BOARD, a 19-by-19 array
 ;;           TOKEN, either *BLACK* or *WHITE*
-;;           POSN, an integer from 0 to 63
+;;           POSN, an integer from 0 to 323
 ;;  OUTPUT:  Doesn't matter
 ;;  SIDE EFFECT:  Destructively modifies BOARD by inserting TOKEN
 ;;                at the position determined by POSN
@@ -99,10 +98,10 @@
 
 ;;  PLACE-TOKEN
 ;; -------------------------------------------------------------------
-;;  INPUTS:  GAME, an OTHELLO struct
-;;           BORED, an 8-by-8 array
+;;  INPUTS:  GAME, an GOMOKU struct
+;;           BORED, a 19-by-19 array
 ;;           PLR, either *BLACK* or *WHITE*
-;;           ROW, COL, integers between 0 and 7
+;;           ROW, COL, integers between 0 and 18
 ;;  OUTPUT:  Doesn't matter
 ;;  SIDE EFFECT:  Places TOKEN on BORED at specified ROW/COL.
 ;;    Also updates the 64-bit vector for the appropriate player
@@ -110,17 +109,17 @@
 
 (defmacro place-token
     (game bored plr row col)
-  `(progn (setf (aref ,bored ,row ,col) ,plr)
-	  (if-black ,plr (incf (othello-black-pieces ,game)
-			       (ash 1 (row-col->posn ,row ,col)))
-		    (incf (othello-white-pieces ,game)
-			  (ash 1 (row-col->posn ,row ,col))))))
+  `(progn (setf (aref ,bored ,row ,col) ,plr) ))
+;;	  (if-black ,plr (incf (othello-black-pieces ,game)
+;;			       (ash 1 (row-col->posn ,row ,col)))
+;;		    (incf (othello-white-pieces ,game)
+;;			  (ash 1 (row-col->posn ,row ,col))))))
 
 ;;  OFF-BOARD?
 ;; ------------------------------------------
 ;;  INPUTS:  ROW, COL, two integers
 ;;  OUTPUT:  T if (ROW,COL) does not specify a legal position
-;;              in an 8-by-8 array; NIL otherwise.
+;;              in a 19-by-19 array; NIL otherwise.
 
 (defmacro off-board?
     (row col)
