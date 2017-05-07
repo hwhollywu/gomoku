@@ -46,13 +46,13 @@
 
 ;;  IF-BLACK-TURN
 ;; -------------------------------------------------------
-;;  INPUTS:  G, an OTHELLO struct
+;;  INPUTS:  G, an GOMOKU struct
 ;;           THEN, ELSE, any two Lisp expressions
 ;;  OUTPUT:  If it's black's turn, then evaluate THEN;
 ;;           Otherwise, evaluate ELSE.
 
 (defmacro if-black-turn (g then else)
-  `(if (eq (othello-whose-turn ,g) ,*black*)
+  `(if (eq (gomoku-whose-turn ,g) ,*black*)
        ,then ,else))
 
 ;;  IF-BLACK
@@ -75,13 +75,13 @@
 
 ;;  TOGGLE-PLAYER!
 ;; ---------------------------------------------------------
-;;  INPUT:  GAME, an OTHELLO struct
+;;  INPUT:  GAME, an GOMOKU struct
 ;;  OUTPUT: The player whose turn it now is (either *BLACK* or *WHITE*)
 ;;  SIDE EFFECT:  Destructively modifies the game to toggle whose turn it is.
 
 (defmacro toggle-player! (game)
-  `(setf (othello-whose-turn ,game)
-     (if-black (othello-whose-turn ,game) ,*white* ,*black*)))
+  `(setf (gomoku-whose-turn ,game)
+     (if-black (gomoku-whose-turn ,game) ,*white* ,*black*)))
 
 ;;  PLACE-TOKEN-AT-POSN
 ;; --------------------------------------------------------------

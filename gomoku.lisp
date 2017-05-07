@@ -4,6 +4,9 @@
 ;;  Lilian Zhao and Hao Wu
 ;; ========================================
 
+;; Defining a constant of direction vectors
+(defconstant directions #((0 -1) (-1 -1) (-1 0) (-1 1) 
+  (0 1) (1 1) (1 0) (1 -1)))
 
 ;;  The GOMOKU struct
 ;; --------------------------------------------------------
