@@ -174,7 +174,7 @@
     (board (gomoku-board game)))
     ;; Case 1: check if it's a legal move when check-legal is true
     (when (and check-legal? (not (is-legal? game row col)))
-      (return-from do-move! game))))
+      (return-from do-move! game))
     ;; Case 2: when the move is legal OR when we don't need to check
     ;; 1. add the new piece to the board
     (setf (aref board row col) color)
