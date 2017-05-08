@@ -225,26 +225,30 @@
         (count 0)
         (sum 0)
         (board (gomoku-board game)))
+    ;; counting tokens of current color in 8 directions
+    ;; and adding the number of two opposite directions together
     (dotimes (dirn 8)
            (let ((count 0)
                  (cr (posn->row current))
                  (cc (posn->col current))
                  (dr (aref *dirns* dirn 0))
                  (dc (aref *dirns* dirn 1)))
+             ;; record number of consecutive token of plr color
              (while (and (not (off-board? cr cc)) (= (aref board cr cc) plr))
                     (incf count)
                     (setf cr (+ cr dr))
                     (setf cc (+ cc dc)))
+             ;; if it is a new direction, record sum
              (if (= sum 0) 
                  (setf sum count)
+                 ;; otherwise we have already the number of tokens in the opposite 
+                 ;; directions. Thus we add them together
+                 ;; -1 because we double count the token in the middle
                  (setf sum (+ (- sum 1) count)))
              (if (> sum 4)
                  (return-from game-over? t)
                  (setf sum 0)))))
   nil)
-
-                  
-
 
 ;;  EVAL-FUNC
 ;; -------------------------------------------------
