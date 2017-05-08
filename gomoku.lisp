@@ -19,6 +19,12 @@
   new-posn
   )
 
+;;  array of directions
+(defconstant *dirns* (make-array '(8 2)
+                                 :initial-contents
+				 '((1 1) (-1 -1) (1 -1)
+				   (-1 1) (0 1) 
+                                   (0 -1) (1 0) (-1 0))))
 
 ;;  WHOSE-TURN
 ;; -----------------------------------------
@@ -213,7 +219,33 @@
 ;;  INPUT:  GAME, an GOMOKU struct
 ;;  OUTPUT:  T if the game is over (i.e., either no open slots in the
 ;;    game board, or one player has five-in-a-row).
+(defun game-over? (game)
+  (let ((current (gomoku-new-posn game))
+        (plr (other-player (gomoku-whose-turn game)))
+        (count 0)
+        (sum 0)
+        (dirn 0)
+        (board (gomoku-board game)))
+    (while (< dirn 8)
+           (setf count 0 
+                 cr (posn->row current)
+                 cc (posn->col current)
+                 dr (aref *dirns* dirn 0)
+                 dc (aref *dirns* dirn 1))
+           (while (and (not (off-board? cr cc)) (= (aref board cr cc)))
+                  (incf count)
+                  (setf cr (+ cr dr))
+                  (setf cc (+ cc dc)))
+           (if (= sum 0) 
+               (setf sum count)
+               (setf sum (+ (- sum 1) count)))
+           (if (> sum 4)
+             (return-from game-over? t)
+             (setf sum 0))))
+  nil)
 
+                  
+           
 
 
 ;;  EVAL-FUNC
