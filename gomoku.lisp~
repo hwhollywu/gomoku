@@ -173,10 +173,8 @@
   (let ((color (gomoku-whose-turn game))
     (board (gomoku-board game)))
     ;; Case 1: check if it's a legal move when check-legal is true
-    (cond 
-      (check-legal?
-      (when (not (is-legal? game row col))
-    (return-from do-move! game))))
+    (when (and check-legal? (not (is-legal? game row col)))
+      (return-from do-move! game))))
     ;; Case 2: when the move is legal OR when we don't need to check
     ;; 1. add the new piece to the board
     (setf (aref board row col) color)
@@ -220,13 +218,14 @@
 ;;  OUTPUT:  T if the game is over (i.e., either no open slots in the
 ;;    game board, or one player has five-in-a-row).
 (defun game-over? (game)
+  (when (= (gomoku-num-open game) 0)
+    (return-from game-over? t))
   (let ((current (gomoku-new-posn game))
         (plr (other-player (gomoku-whose-turn game)))
         (count 0)
         (sum 0)
-        (dirn 0)
         (board (gomoku-board game)))
-    (while (< dirn 8)
+    (dotimes (dirn 8)
            (setf count 0 
                  cr (posn->row current)
                  cc (posn->col current)
@@ -245,7 +244,6 @@
   nil)
 
                   
-           
 
 
 ;;  EVAL-FUNC
