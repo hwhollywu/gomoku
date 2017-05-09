@@ -19,6 +19,18 @@
   new-posn
   )
 
+;; scores for static evaluation function
+(defconstant *one* 10)
+(defconstant *two* 100)
+(defconstant *three* 1000)
+(defconstant *four* 100000)
+(defconstant *five* 1000000)
+(defconstant *block-one* 1)
+(defconstant *block-two* 10)
+(defconstant *block-three* 100)
+(defconstant *block-four* 10000)
+
+
 ;;  array of directions
 (defconstant *dirns* (make-array '(8 2)
                                  :initial-contents
@@ -215,7 +227,8 @@
 ;;  GAME-OVER?
 ;; -----------------------------
 ;;  INPUT:  GAME, an GOMOKU struct
-;;  OUTPUT:  the winner of the game
+;;  OUTPUT:  If not over, return NIL. If game over, return the winner of the game.
+;;           Return 0 if draw. 
 (defun game-over? (game)
   (let ((current (gomoku-new-posn game))
         (plr (other-player (gomoku-whose-turn game)))
@@ -264,6 +277,7 @@
     ((game gomoku))
   ;; Do random moves until the game is over
   (let ((winner (game-over? game)))
+    ;; return the winner of the game
     (while (not winner)
            (do-random-move! game)
            (setf winner (game-over? game)))

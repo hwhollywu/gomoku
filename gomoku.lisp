@@ -227,7 +227,8 @@
 ;;  GAME-OVER?
 ;; -----------------------------
 ;;  INPUT:  GAME, an GOMOKU struct
-;;  OUTPUT:  the winner of the game
+;;  OUTPUT:  If not over, return NIL. If game over, return the winner of the game.
+;;           Return 0 if draw. 
 (defun game-over? (game)
   (let ((current (gomoku-new-posn game))
         (plr (other-player (gomoku-whose-turn game)))
@@ -276,6 +277,7 @@
     ((game gomoku))
   ;; Do random moves until the game is over
   (let ((winner (game-over? game)))
+    ;; return the winner of the game
     (while (not winner)
            (do-random-move! game)
            (setf winner (game-over? game)))
