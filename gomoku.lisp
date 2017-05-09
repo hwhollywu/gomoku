@@ -197,7 +197,7 @@
     ;; 3. toggle player
     (toggle-player! game)
     ;; 4. set the new-posn to this move
-    (setf (gomoku-new-posn game) (list row col))
+    (setf (gomoku-new-posn game) (row-col->posn row col))
     ;; return the game
     game))
 
@@ -237,6 +237,7 @@
         (count 0)
         (sum 0)
         (board (gomoku-board game)))
+    (format t "plr ~a" plr)
     ;; counting tokens of current color in 8 directions
     ;; and adding the number of two opposite directions together
     (dotimes (dirn 8)
