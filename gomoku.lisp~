@@ -215,11 +215,8 @@
 ;;  GAME-OVER?
 ;; -----------------------------
 ;;  INPUT:  GAME, an GOMOKU struct
-;;  OUTPUT:  T if the game is over (i.e., either no open slots in the
-;;    game board, or one player has five-in-a-row).
+;;  OUTPUT:  the winner of the game
 (defun game-over? (game)
-  (when (= (gomoku-num-open game) 0)
-    (return-from game-over? t))
   (let ((current (gomoku-new-posn game))
         (plr (other-player (gomoku-whose-turn game)))
         (count 0)
@@ -246,9 +243,31 @@
                  ;; -1 because we double count the token in the middle
                  (setf sum (+ (- sum 1) count)))
              (if (> sum 4)
-                 (return-from game-over? t)
+                 (return-from game-over? plr)
                  (setf sum 0)))))
+
+  (when (= (gomoku-num-open game) 0)
+    (return-from game-over? 0))
   nil)
+
+;;  DEFAULT-POLICY
+;; ---------------------------------------------------------------------------
+;;  INPUT:  GAME, an OTHELLO struct
+;;  OUTPUT: The result (from black's perspective) of playing out the
+;;    current game using randomly selected moves.  The amount of the
+;;    win/loss is reported by the SQUARE-ROOT of the absolute difference
+;;    in the number of tokens for the two players.  For example, if the
+;;    game ends with WHITE having 25 tokens and BLACK having 31 tokens,
+;;    then black wins by 6 tokens, and the output is approximately 2.45.
+
+(defmethod default-policy
+    ((game gomoku))
+  ;; Do random moves until the game is over
+  (let ((winner (game-over? game)))
+    (while (not winner)
+           (do-random-move! game)
+           (setf winner (game-over? game)))
+    winner))
 
 ;;  EVAL-FUNC
 ;; -------------------------------------------------
@@ -256,6 +275,10 @@
 ;;  OUTPUT:  The static evaluation of the current state of the game
 ;;           based on the difference in piece values held by 
 ;;           the two players.
+
+;; count consecutive 3 & 4
+;; and whether surrounded by open space or opposite token
+
 
 
 
