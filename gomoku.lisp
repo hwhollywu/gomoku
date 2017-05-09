@@ -284,7 +284,7 @@
     (while (not winner)
            (do-random-move! game)
            (setf winner (game-over? game)))
-    winner))
+    (- 1 winner)))
 
 ;;  EVAL-FUNC
 ;; -------------------------------------------------
