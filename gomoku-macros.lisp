@@ -107,12 +107,12 @@
 ;;    (see the STATE struct)
 
 (defmacro place-token
-    (bored plr row col)
-  `(progn (setf (aref ,bored ,row ,col) ,plr) ))
-;;	  (if-black ,plr (incf (othello-black-pieces ,game)
-;;			       (ash 1 (row-col->posn ,row ,col)))
-;;		    (incf (othello-white-pieces ,game)
-;;			  (ash 1 (row-col->posn ,row ,col))))))
+    (game bored plr row col)
+  `(progn (setf (aref ,bored ,row ,col) ,plr)
+	  (if-black ,plr (incf (gomoku-black-pieces ,game)
+			       (ash 1 (row-col->posn ,row ,col)))
+		    (incf (gomoku-white-pieces ,game)
+			  (ash 1 (row-col->posn ,row ,col))))))
 
 ;;  OFF-BOARD?
 ;; ------------------------------------------

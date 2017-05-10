@@ -13,6 +13,10 @@
   (board (make-array '(15 15) :initial-element *blank*))      
   ;; WHOSE-TURN:  either *BLACK* or *WHITE*
   whose-turn
+  ;; white-pieces
+  white-pieces
+  ;; black-pieces
+  black-pieces
   ;; NUM-OPEN:  the number of open spaces on the BOARD (always <= 60)
   num-open
   ;; NEW-POSN: the latest move
@@ -29,6 +33,7 @@
 (defconstant *block-two* 10)
 (defconstant *block-three* 100)
 (defconstant *block-four* 10000)
+
 
 (defconstant *border* 100)
 
@@ -73,7 +78,10 @@
     ((game gomoku))
   (make-gomoku :board (copy-array (gomoku-board game))
 		:whose-turn (gomoku-whose-turn game)
-		:num-open (gomoku-num-open game)))
+		:num-open (gomoku-num-open game)
+    :white-pieces (gomoku-white-pieces game)
+    :black-pieces (gomoku-black-pieces game)
+    :new-posn (gomoku-new-posn game)))
 
 ;;  PRINT-GOMOKU
 ;; --------------------------------------------------
@@ -114,8 +122,20 @@
     ()
   (let* ((game (make-gomoku :whose-turn *black*
 			     :num-open 225
-           :new-posn nil)))
+           :new-posn nil
+           :black-pieces 0
+           :white-pieces 0)))
     game))
+
+
+(defmethod make-hash-key-from-game
+    ((game gomoku))
+  (list (gomoku-white-pieces game)
+  (gomoku-black-pieces game)
+  (gomoku-whose-turn game)))
+
+
+
 
 
 ;;  Defines the following METHODS 
@@ -184,14 +204,21 @@
 ;;           passes the IS-LEGAL? check
 
 (defun do-move! (game check-legal? row col)
-  (let ((color (gomoku-whose-turn game))
+  (let ((plr (gomoku-whose-turn game))
     (board (gomoku-board game)))
     ;; Case 1: check if it's a legal move when check-legal is true
     (when (and check-legal? (not (is-legal? game row col)))
       (return-from do-move! game))
     ;; Case 2: when the move is legal OR when we don't need to check
     ;; 1. add the new piece to the board
-    (setf (aref board row col) color)
+
+    (setf (aref board row col) plr)
+
+    (if (eq plr *black*)
+      (incf (gomoku-black-pieces game)
+        (ash 1 (row-col->posn row col)))
+      (incf (gomoku-white-pieces game)
+        (ash 1 (row-col->posn row col))))
     ;; 2. decrease the number of empty slots available on the board
     (decf (gomoku-num-open game))
     ;; 3. toggle player
@@ -237,7 +264,8 @@
         (count 0)
         (sum 0)
         (board (gomoku-board game)))
-    (format t "plr ~a" plr)
+    (when (not current)
+      (return-from game-over? nil))
     ;; counting tokens of current color in 8 directions
     ;; and adding the number of two opposite directions together
     (dotimes (dirn 8)
@@ -266,9 +294,10 @@
     (return-from game-over? 0))
   nil)
 
+
 ;;  DEFAULT-POLICY
 ;; ---------------------------------------------------------------------------
-;;  INPUT:  GAME, an OTHELLO struct
+;;  INPUT:  GAME, an GOMOKU struct
 ;;  OUTPUT: The result (from black's perspective) of playing out the
 ;;    current game using randomly selected moves.  The amount of the
 ;;    win/loss is reported by the SQUARE-ROOT of the absolute difference
@@ -276,15 +305,15 @@
 ;;    game ends with WHITE having 25 tokens and BLACK having 31 tokens,
 ;;    then black wins by 6 tokens, and the output is approximately 2.45.
 
-(defmethod default-policy
-    ((game gomoku))
+(defun default-policy
+  (game)
   ;; Do random moves until the game is over
   (let ((winner (game-over? game)))
     ;; return the winner of the game
     (while (not winner)
            (do-random-move! game)
            (setf winner (game-over? game)))
-    (- 1 winner)))
+    (* (- winner) (sqrt (sqrt (gomoku-num-open game))))))
 
 ;;  EVAL-FUNC
 ;; -------------------------------------------------
@@ -309,8 +338,8 @@
         (count (make-array '(2 3 5) :initial-element 0)))
     ;; horizontally
     (dotimes (i 15)
-      (let ((curr nil)
-            (last nil)
+      (let ((curr 0)
+            (last *border*)
             (beforeblock 1)
             (afterblock 0)
             (counter 0))
@@ -335,10 +364,11 @@
                      (setf counter 1)
                      (setf beforeblock 0))))
           (setf last curr))))
+
     ;; vertically
     (dotimes (i 15)
-      (let ((curr nil)
-            (last nil)
+      (let ((curr 0)
+            (last *border*)
             (beforeblock 1)
             (afterblock 0)
             (counter 0))
@@ -366,8 +396,8 @@
     ;; diagonally
     ;; letfdown from first row
     (dotimes (j 14)
-      (let ((curr nil)
-            (last nil)
+      (let ((curr 0)
+            (last *border*)
             (beforeblock 1)
             (afterblock 0)
             (counter 0)
@@ -402,8 +432,8 @@
 
     ;; letfdown from last column
     (dotimes (i 15)
-      (let ((curr nil)
-            (last nil)
+      (let ((curr 0)
+            (last *border*)
             (beforeblock 1)
             (afterblock 0)
             (counter 0)
@@ -439,8 +469,8 @@
     
     ;; rightup from last column
     (dotimes (i 14)
-      (let ((curr nil)
-            (last nil)
+      (let ((curr 0)
+            (last *border*)
             (beforeblock 1)
             (afterblock 0)
             (counter 0)
@@ -476,8 +506,8 @@
     
     ;; rightup from last row
     (dotimes (j 15)
-      (let ((curr nil)
-            (last nil)
+      (let ((curr 0)
+            (last *border*)
             (beforeblock 1)
             (afterblock 0)
             (counter 0)

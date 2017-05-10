@@ -311,7 +311,7 @@
 
 (defun compete
     (black-num-sims black-c white-num-sims white-c)
-  (let ((g (new-othello)))
+  (let ((g (new-gomoku)))
     (while (not (game-over? g))
       (cond
        ((eq (whose-turn g) *black*)

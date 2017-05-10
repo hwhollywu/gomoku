@@ -13,6 +13,7 @@
     (list "basic-defns"        ;; this file
 	  "gomoku-macros"     ;; macros, etc.   
 	  "gomoku"    ;; struct and basics
+	  "mcts"
 	  ;; "mcts-template"      ;; <---- PUT YOUR MCTS FUNCS HERE!! 
 	  )) 
 
