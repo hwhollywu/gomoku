@@ -5,14 +5,17 @@
 
 (defconstant *black* -1)
 (defconstant *white* 1)
+(defconstant *border* 100)
+
 
 (defparameter *neg-inf* -10000000)
 (defparameter *pos-inf*  10000000)
 
+
 (defparameter *list-o-files* 
     (list "basic-defns"        ;; this file
 	  "gomoku-macros"     ;; macros, etc.   
-	  "gomoku"    ;; struct and basics
+	  "gomoku-alpha-beta"    ;; struct and basics
 	  "mcts"
 	  ;; "mcts-template"      ;; <---- PUT YOUR MCTS FUNCS HERE!! 
 	  )) 

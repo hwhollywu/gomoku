@@ -94,7 +94,7 @@
 
 (defun insert-new-node
     (game tree key)
-  (let* ((moves (legal-moves game))
+  (let* ((moves (gomoku-legal-moves game))
 	 (num-moves (length moves))
 	 (nodey (make-mc-node 
 		 :key key
