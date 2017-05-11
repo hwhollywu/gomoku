@@ -6,7 +6,7 @@
 
 
 ;; scores for static evaluation function
-(defconstant *one* 10)
+(defconstant *one* 5)
 (defconstant *two* 100)
 (defconstant *three* 1000)
 (defconstant *four* 100000)
@@ -279,11 +279,12 @@
         (sum 0)
         (board (gomoku-board game)))
     (when (not current)
+      (format t "BUGGGGG")
       (return-from game-over? nil))
     ;; counting tokens of current color in 8 directions
     ;; and adding the number of two opposite directions together
     (dotimes (dirn 8)
-           (let ((count 0)
+           (let* ((count 0)
                  (cr (posn->row current))
                  (cc (posn->col current))
                  (dr (aref *dirns* dirn 0))
@@ -294,15 +295,14 @@
                     (setf cr (+ cr dr))
                     (setf cc (+ cc dc)))
              ;; if it is a new direction, record sum
-             (if (= sum 0) 
+             (if (evenp dirn) 
                  (setf sum count)
                  ;; otherwise we have already the number of tokens in the opposite 
                  ;; directions. Thus we add them together
                  ;; -1 because we double count the token in the middle
                  (setf sum (+ (- sum 1) count)))
-             (if (> sum 4)
-                 (return-from game-over? plr)
-                 (setf sum 0)))))
+             (when (> sum 4)
+                 (return-from game-over? plr)))))
 
   (when (= (gomoku-num-open game) 0)
     (return-from game-over? 0))
@@ -605,6 +605,39 @@
              (incf (aref count 1 (+ beforeblock afterblock) (- counter 1))))
             ((= last *black*)
              (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))))))
-      count))
+    count))
+
+
+
+
+(defun eval-func
+    (game)
+  (let* ((count (eval-helper game))
+      (black-score
+        (+ (* *one* (aref count 0 0 0))
+           (* *two* (aref count 0 0 1))
+           (* *three* (aref count 0 0 2))
+           (* *four* (aref count 0 0 3))
+           (* *block-one* (aref count 0 1 0))
+           (* *block-two* (aref count 0 1 1))
+           (* *block-three* (aref count 0 1 2))
+           (* *block-four* (aref count 0 1 3))
+           (* *five* 
+              (+ (aref count 0 0 4) (aref count 0 1 4) (aref count 0 1 4)))))
+      (white-score
+        (+ (* *one* (aref count 1 0 0))
+           (* *two* (aref count 1 0 1))
+           (* *three* (aref count 1 0 2))
+           (* *four* (aref count 1 0 3))
+           (* *block-one* (aref count 1 1 0))
+           (* *block-two* (aref count 1 1 1))
+           (* *block-three* (aref count 1 1 2))
+           (* *block-four* (aref count 1 1 3))
+           (* *five* 
+              (+ (aref count 1 0 4) (aref count 1 1 4) (aref count 1 1 4))))))
+      (- black-score white-score)))
+      
+
+    
 
 
