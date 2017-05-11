@@ -221,7 +221,7 @@
     (board (gomoku-board game))
     (legal-moves (gomoku-legal-moves game)))
 
-  (format t "do-move!~%")
+  ;(format t "do-move!~%")
     ;; Case 1: check if it's a legal move when check-legal is true
     (when (and check-legal? (not (is-legal? game row col)))
       (return-from do-move! game))
@@ -235,10 +235,9 @@
     ;; 4. set the new-posn to this move
     (setf (gomoku-new-posn game) (row-col->posn row col))
     ;; 5. set the legal moves for the game
-    (format t "new-posn!~a~%" (gomoku-new-posn game))
-    (format t "gen-legal-moves: ~a~%" (gen-legal-moves game))
+    ;(format t "new-posn!~a~%" (gomoku-new-posn game))
+    ;(format t "gen-legal-moves: ~a~%" (gen-legal-moves game))
     (setf legal-moves (append (gen-legal-moves game) legal-moves))
-    (format t "new-legal-moves: ~a~%" legal-moves)
     ;; return the game
     game))
 
@@ -273,6 +272,7 @@
 ;;  INPUT:  GAME, an GOMOKU struct
 ;;  OUTPUT:  If not over, return NIL. If game over, return the winner of the game.
 ;;           Return 0 if draw. 
+
 (defun game-over? (game)
   (let ((current (gomoku-new-posn game))
         (plr (other-player (gomoku-whose-turn game)))

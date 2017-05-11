@@ -13,11 +13,11 @@
 ;;   a depth of CUTOFF-DEPTH.
 
 (defun compute-move (g cutoff-depth)
-  (format t "COMPUTE-MOVE BY LUKE HUNSBERGER (cutoff: ~A)~%" cutoff-depth)
+  (format t "COMPUTE-MOVE (cutoff: ~A)~%" cutoff-depth)
   (cond
    ;; Case 1:  Game already over, nothing to do
    ((game-over? g)
-    (format t "Game is over!  Sorry dude!~%")
+    (format t "Game is over! ~%")
     nil)
    ;; Case 2:  Game still on, compute best move...
    (t
@@ -141,11 +141,3 @@
 
 
 
-;;  MY-TEST
-;; -------------------------
-;;  See instructions
-
-(defun my-test
-    ()
-  'ONE_MORE_CHESS_PROBLEM
-  )
