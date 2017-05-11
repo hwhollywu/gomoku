@@ -15,7 +15,7 @@
 (defparameter *list-o-files* 
     (list "basic-defns"        ;; this file
 	  "gomoku-macros"     ;; macros, etc.   
-	  "gomoku-alpha-beta"    ;; struct and basics
+	  "gomoku"    ;; struct and basics
 	  "mcts"
 	  ;; "mcts-template"      ;; <---- PUT YOUR MCTS FUNCS HERE!! 
 	  )) 
