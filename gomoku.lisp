@@ -218,8 +218,7 @@
 
 (defun do-move! (game check-legal? row col)
   (let ((plr (gomoku-whose-turn game))
-    (board (gomoku-board game))
-    (legal-moves (gomoku-legal-moves game)))
+    (board (gomoku-board game)))
 
   ;(format t "do-move!~%")
     ;; Case 1: check if it's a legal move when check-legal is true
@@ -237,7 +236,8 @@
     ;; 5. set the legal moves for the game
     ;(format t "new-posn!~a~%" (gomoku-new-posn game))
     ;(format t "gen-legal-moves: ~a~%" (gen-legal-moves game))
-    (setf legal-moves (append (gen-legal-moves game) legal-moves))
+    (setf (gomoku-legal-moves game) 
+      (append (gen-legal-moves game) (gomoku-legal-moves game)))
     ;; return the game
     game))
 

@@ -17,7 +17,7 @@
 	  "gomoku-macros"     ;; macros, etc.   
 	  "gomoku"    ;; struct and basics
 	  "mcts"
-	  ;; "mcts-template"      ;; <---- PUT YOUR MCTS FUNCS HERE!! 
+    "alpha-beta"
 	  )) 
 
 ;;  MAKER
