@@ -51,14 +51,13 @@
   )
 
 
-;;  WHOSE-TURN
-;; -----------------------------------------
-;;  INPUT:  GAME, an GOMOKU struct
-;;  OUTPUT: The player whose turn it is (*black* or *white*)
+;;  STATS struct
+;; ---------------------------
+;;  Stats compiled during minimax search
 
-(defmethod whose-turn
-    ((game gomoku))
-  (gomoku-whose-turn game))
+(defstruct stats
+  (num-moves-done 0)
+  (num-potential-moves 0))
 
 
 ;;  COPY-ARRAY

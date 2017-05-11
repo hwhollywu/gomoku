@@ -61,7 +61,7 @@
      
      ;; Recursive Case:  Need to do minimax with alpha-beta pruning
      (t
-      (let ((moves (legal-moves g))) ;; (randomize (legal-moves g))
+      (let ((moves (gomoku-legal-moves g))) ;; (randomize (legal-moves g))
 	(incf (stats-num-potential-moves statty) (length moves))
 	(dolist (mv moves)
 	  (incf (stats-num-moves-done statty))
@@ -119,7 +119,7 @@
    
    ;; Otherwise, we need to use recursion!
    (t
-    (let ((moves (legal-moves g))) ;; (randomize (legal-moves g))
+    (let ((moves (gomoku-legal-moves g))) ;; (randomize (legal-moves g))
       (incf (stats-num-potential-moves statty) (length moves))
       (dolist (mv moves)
 	(incf (stats-num-moves-done statty))

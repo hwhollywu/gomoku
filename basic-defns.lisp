@@ -10,6 +10,8 @@
 
 (defparameter *neg-inf* -10000000)
 (defparameter *pos-inf*  10000000)
+(defconstant *win-value* 400000)
+(defconstant *loss-value* -400000)
 
 
 (defparameter *list-o-files* 
@@ -17,7 +19,7 @@
 	  "gomoku-macros"     ;; macros, etc.   
 	  "gomoku"    ;; struct and basics
 	  "mcts"
-    ;;"alpha-beta"
+      "alpha-beta"
 	  )) 
 
 ;;  MAKER
