@@ -48,6 +48,8 @@
   new-posn
   ;; LEGAL-MOVES: a vector of all legal moves around the new-posn (+- 4 tokens)
   legal-moves
+  ;; MOVE-HISTORY: a list of the moves that got us from initial state to the current state
+  move-history
   )
 
 
@@ -87,7 +89,8 @@
     :white-pieces (gomoku-white-pieces game)
     :black-pieces (gomoku-black-pieces game)
     :new-posn (gomoku-new-posn game)
-    :legal-moves (gomoku-legal-moves game)))
+    :legal-moves (gomoku-legal-moves game)
+    :move-history (gomoku-move-history game)))
 
 ;;  PRINT-GOMOKU
 ;; --------------------------------------------------
@@ -133,7 +136,8 @@
            :new-posn (row-col->posn 7 7)
            :black-pieces 0
            :white-pieces 0
-           :legal-moves nil))
+           :legal-moves nil
+           :move-history nil))
   (bored (gomoku-board game)))
   (place-token game bored *black* 7 7)
   (setf (gomoku-legal-moves game) (gen-legal-moves game))
@@ -153,10 +157,11 @@
 ;;     IS-LEGAL?        ok
 ;;     LEGAL-MOVES      ok
 ;;     DO-MOVE!         ok
-;;     DO-RANDOM-MOVE!  ok  ??
-;;     DEFAULT-POLICY   ??
-;;     GAME-OVER?  
-;;     EVAL-FUNC
+;;     DO-RANDOM-MOVE!  ok  
+;;     DEFAULT-POLICY   ok
+;;     GAME-OVER?       ok
+;;     EVAL-FUNC        ok
+;;     UNDO-MOVE
 
 
 ;;  IS-LEGAL?
@@ -233,10 +238,10 @@
     ;; 4. set the new-posn to this move
     (setf (gomoku-new-posn game) (row-col->posn row col))
     ;; 5. set the legal moves for the game
-    ;(format t "new-posn!~a~%" (gomoku-new-posn game))
-    ;(format t "gen-legal-moves: ~a~%" (gen-legal-moves game))
     (setf (gomoku-legal-moves game) 
       (append (gen-legal-moves game) (gomoku-legal-moves game)))
+    ;; 6. push move into move-history
+    (push (list row col) (gomoku-move-history game))
     ;; return the game
     game))
 
@@ -264,6 +269,48 @@
 (defun do-random-move! (game)
   (let ((chosenmove (random-move game)))
     (do-move! game nil (first chosenmove) (second chosenmove))))
+
+
+
+;; UNDO-MOVE
+;; -----------------------------
+
+(defun undo-move! (g)
+  (cond
+   ;; Case 1:  No moves on move history!
+   ((null (gomoku-move-history g))
+    (format t "Umm... Can't undo move... empty history!~%")
+    g)
+   
+   ;; Case 2:  There is a move to undo...
+   (t
+    (let* ((move (pop (gomoku-move-history g)))
+     (bored (gomoku-board g))
+     (r1 (first move))
+     (c1 (second move))
+     (r2 (third move))
+     (c2 (fourth move))
+     (piece (aref bored r2 c2))
+     (destn (fifth move))
+     (opponent (gomoku-whose-turn? g)))
+      (when (aref bored r1 c1)
+  (format t "Gonna undo move, but something was on source square!~%"))
+      (when (null piece)
+  (format t "Wanna undo a move, but there's no piece at destn!~%"))
+      (when (and destn (not (eq opponent (piece-owner destn))))
+  (format t "Umm... opponent not owner of captured piece~%"))
+      ;; remove piece from (r2,c2)
+      (setf (aref bored r2 c2) nil)
+      ;; if necessary, restore previously captured piece to (r2,c2)
+      (when destn (put-piece! g destn))
+      ;; move piece back to (r1,c1)
+      (setf (aref bored r1 c1) piece)
+      (setf (piece-row piece) r1)
+      (setf (piece-col piece) c1)
+      ;; Toggle the turn!
+      (toggle-turn! g)
+      ;; Return the CHESS struct
+      g))))
 
 
 ;;  GAME-OVER?
