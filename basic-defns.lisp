@@ -17,7 +17,7 @@
 	  "gomoku-macros"     ;; macros, etc.   
 	  "gomoku"    ;; struct and basics
 	  "mcts"
-    "alpha-beta"
+    ;;"alpha-beta"
 	  )) 
 
 ;;  MAKER

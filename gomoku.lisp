@@ -433,7 +433,7 @@
     ;; diagonally
     ;; letfdown from first row
 
-    (format t "letfdown before ~a~%" count)
+    ;(format t "letfdown before ~a~%" count)
     (dotimes (k 14)
       ;;(format t "leftdown ~a th ~%" k)
     (let ((curr 0)
@@ -475,7 +475,7 @@
              (incf (aref count 1 (+ beforeblock afterblock) (- counter 1))))
             ((= last *black*)
              (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))))))
-    (format t "letfdown from first row ~a~%" count)
+    ;(format t "letfdown from first row ~a~%" count)
 
     ;; letfdown from last column    
     (dotimes (k 15)
@@ -519,7 +519,7 @@
              (incf (aref count 1 (+ beforeblock afterblock) (- counter 1))))
             ((= last *black*)
              (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))))))
-        (format t "letfdown from first row ~a~%" count)
+        ;(format t "letfdown from first row ~a~%" count)
 
     ;; leftup from last column
     (dotimes (k 14)
@@ -562,7 +562,7 @@
              (incf (aref count 1 (+ beforeblock afterblock) (- counter 1))))
             ((= last *black*)
              (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))))))
-     (format t "leftup from last col ~a~%" count)
+     ;(format t "leftup from last col ~a~%" count)
 
     ;; leftup from last row
     (dotimes (k 15)
