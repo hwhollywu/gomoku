@@ -23,11 +23,11 @@
            (-1 1) (0 1) (0 -1) (1 0) (-1 0))))
 
 (defconstant *neighbors* (make-array '(24 2) :initial-contents
-    '((-2 -2) (-2 -1) (-2 0) (-2 1) (-2 2)
-      (-1 -2) (-1 -1) (-1 0) (-1 1) (-1 2)
-      (0 -2) (0 -1) (0 1) (0 2)
-      (1 -2) (1 -1) (1 0) (1 1) (1 2)
-      (2 -2) (2 -1) (2 0) (2 1) (2 2))))
+				     '((-2 -2) (-2 -1) (-2 0) (-2 1) (-2 2)
+				       (-1 -2) (-1 -1) (-1 0) (-1 1) (-1 2)
+				       (0 -2) (0 -1) (0 1) (0 2)
+				       (1 -2) (1 -1) (1 0) (1 1) (1 2)
+				       (2 -2) (2 -1) (2 0) (2 1) (2 2))))
 
 
 ;;  The GOMOKU struct
@@ -44,14 +44,11 @@
   black-pieces
   ;; NUM-OPEN:  the number of open spaces on the BOARD (always <= 60)
   num-open
-  ;; NEW-POSN: the latest move
-  new-posn
-  ;; LEGAL-MOVES: a vector of all legal moves around the new-posn (+- 4 tokens)
-  legal-moves
   ;; MOVE-HISTORY: a list of the moves that got us from initial state to the current state
   move-history
+  ;; LEGAL-MOVES: a vector of all legal moves around the new-posn (+- 4 tokens)
+  legal-moves
   )
-
 
 ;;  STATS struct
 ;; ---------------------------
@@ -78,27 +75,26 @@
 
 ;;  COPY-GAME
 ;; ------------------------------------------
-;;  INPUT:   GAME, an GOMOKU struct
+;;  INPUT:   GAME, an gomoku struct
 ;;  OUTPUT:  A copy of GAME
 
 (defmethod copy-game
-    ((game gomoku))
+  ((game gomoku))
   (make-gomoku :board (copy-array (gomoku-board game))
-		:whose-turn (gomoku-whose-turn game)
-		:num-open (gomoku-num-open game)
-    :white-pieces (gomoku-white-pieces game)
-    :black-pieces (gomoku-black-pieces game)
-    :new-posn (gomoku-new-posn game)
-    :legal-moves (gomoku-legal-moves game)
-    :move-history (gomoku-move-history game)))
+		   :whose-turn (gomoku-whose-turn game)
+		   :num-open (gomoku-num-open game)
+		   :white-pieces (gomoku-white-pieces game)
+		   :black-pieces (gomoku-black-pieces game)
+		   :move-history (gomoku-move-history game)
+		   :legal-moves (gomoku-legal-moves game)))
 
-;;  PRINT-GOMOKU
+;;  PRINT-gomoku
 ;; --------------------------------------------------
-;;  INPUTS:  G, an GOMOKU struct
+;;  INPUTS:  G, an gomoku struct
 ;;           STR, output stream (or T)
 ;;           DEPTH, ignored
 ;;  OUTPUT:  None
-;;  SIDE EFFECT:  Displays the GOMOKU game
+;;  SIDE EFFECT:  Displays the gomoku game
 
 (defun print-gomoku
     (g str d)
@@ -108,13 +104,13 @@
     (format str "------------------------------------------------~%")
     (dotimes (r 15)
       (if (< r 10)
-        (format str "~A | " r)
+	  (format str "~A | " r)
         (format str "~A| " r))
       (dotimes (c 15)
 	(let ((token (aref bored r c)))
 	  (format str "~A  " (cond ((eq token *black*) *black-show*)
-				  ((eq token *white*) *white-show*)
-				  (t *blank-show*)))))
+				   ((eq token *white*) *white-show*)
+				   (t *blank-show*)))))
       (format str "~%"))
     (format str "~%")
     (format str "                   It is ~A's turn!~%" 
@@ -122,97 +118,155 @@
     ))
 
 
-;;  NEW-GOMOKU
+;;  NEW-gomoku
 ;; --------------------------------------
 ;;  INPUTS:  None
-;;  OUTPUT:  An GOMOKU struct representing a new game
+;;  OUTPUT:  An gomoku struct representing a new game
 ;;  The game starts at white player's turn, the black always put
 ;;  the token in the middle of board
 
 (defun new-gomoku
     ()
-  (let* ((game (make-gomoku :whose-turn *white*
-			     :num-open 224
-           :new-posn (row-col->posn 7 7)
+  (let ((game (make-gomoku :whose-turn *black* 
+			     :num-open (* 15 15) 
            :black-pieces 0
            :white-pieces 0
            :legal-moves nil
-           :move-history nil))
-  (bored (gomoku-board game)))
-  (place-token game bored *black* 7 7)
-  (setf (gomoku-legal-moves game) (gen-legal-moves game))
+           :move-history nil)))
+  (do-move! game nil 7 7)
   game))
 
 
 (defmethod make-hash-key-from-game
-    ((game gomoku))
+  ((game gomoku))
   (list (gomoku-white-pieces game)
-  (gomoku-black-pieces game)
-  (gomoku-whose-turn game)))
+	(gomoku-black-pieces game)
+	(gomoku-whose-turn game)))
 
 
 
-;;  Defines the following METHODS 
-;; ---------------------------------------------------------
-;;     IS-LEGAL?        ok
-;;     LEGAL-MOVES      ok
-;;     DO-MOVE!         ok
-;;     DO-RANDOM-MOVE!  ok  
-;;     DEFAULT-POLICY   ok
-;;     GAME-OVER?       ok
-;;     EVAL-FUNC        ok
-;;     UNDO-MOVE
+;;  WHOSE-TURN
+;; -----------------------------------------
+;;  INPUT:  GAME, an OTHELLO struct
+;;  OUTPUT: The player whose turn it is (*black* or *white*)
+
+(defmethod whose-turn
+  ((game gomoku))
+  (gomoku-whose-turn game))
 
 
 ;;  IS-LEGAL?
 ;; -----------------------------------
-;;  INPUTS:  GAME, an GOMOKU struct
+;;  INPUTS:  GAME, an gomoku struct
 ;;           ROW, COL, integers
 ;;  OUTPUT:  T if this is a legal move for PLAYER
 
 (defun is-legal? (game row col)
   (let ((board (gomoku-board game)))
-  (cond
+    (cond
      ;; Case 1: Check if it's on board 
      ((off-board? row col)
       NIL)
      ;; Case 2: check if the spot is taken already
      ((or (equal (aref board row col) *black*)
-    (equal (aref board row col) *white*)) 
+          (equal (aref board row col) *white*)) 
       NIL)
-     (t t))))
+     (t 
+      t))))
+
+
+;;; IS-LEGAL-33
+;; -----------------------------------
+;;  INPUTS:  GAME, an gomoku struct
+;;           ROW, COL, integers
+;;  OUTPUT:  T if this is a legal move for PLAYER
+(defun is-legal-33
+    (game row col)
+  (let ((plr (gomoku-whose-turn game))
+        (sum 0)
+        (num-of-three 0)
+        (open t)
+        (open-now t)
+        (board (gomoku-board game)))
+    (when (or (off-board? row col)
+              (not (equal (aref board row col) *blank*)))
+      (return-from is-legal-33 nil))
+    (when (= plr *white*)
+      (return-from is-legal-33 t))
+    
+    ;; counting tokens of current color in 8 directions
+    ;; and adding the number of two opposite directions together
+    (dotimes (dirn 8)
+      (let* ((count 0)
+	     (dr (aref *dirns* dirn 0))
+	     (dc (aref *dirns* dirn 1))
+	     (cr (+ dr row))
+	     (cc (+ dc col)))
+	;; record number of consecutive token of plr color
+	
+	(while (and (not (off-board? cr cc)) (= (aref board cr cc) plr))
+	  (incf count)
+	  (setf cr (+ cr dr))
+	  (setf cc (+ cc dc)))
+	;; the current cirection is open if next token is BLANK
+	(if (and (not (off-board? cr cc)) (= (aref board cr cc) *blank*))
+	    (setf open-now t)
+	  (setf open-now nil))
+	;; if it is a new direction, record sum, and set open to be open-now
+	(cond
+	 ((evenp dirn) 
+	  (setf open open-now)
+	  (setf sum count))
+	 ;; otherwise we have already the number of tokens in the opposite 
+	 ;; directions. Thus we add them together
+	 ;; -1 because we double count the token in the middle
+	 ;; this chain is open if and only if this and the 
+	 ;; opposite direction are open
+	 (t
+	  (setf open (and open open-now))
+	  (setf sum (+ sum 1 count))))
+	;; if it is an open 3, increment the counter
+	(when (and (= sum 3) open)
+	  (incf num-of-three))
+	;; if we have more than one open three, not legal
+	(when (> num-of-three 1)
+	  (return-from is-legal-33 nil))
+	)))
+  t)
+
+
+
 
 ;;  GEN-LEGAL-MOVES
 ;; -------------------------------------------
-;;  INPUT:  GAME, an GOMOKU struct
+;;  INPUT:  GAME, an gomoku struct
 ;;  OUTPUT:  A list of the legal moves available to the current player.
 ;;  Note:  If no "legal" moves, then returns a vector containing the *pass* move.
 
 (defun gen-legal-moves (game)
   ;; create an initial empty list of moves 
   (let* ((moves NIL)
-  (new-posn (gomoku-new-posn game))
-  (i (posn->row new-posn))
-  (j (posn->col new-posn)))
-  ;; go through the +- 4 tokens around the new-posn
-  (dotimes (token 24)
-    (let* ((r-c (aref *neighbors* token 0))
-      (c-c (aref *neighbors* token 1))
-      (row (+ i r-c))
-      (col (+ j c-c)))
-  ;; If the move is legal 
-  (when (is-legal? game row col)
-      ;; add the position array to moves 
-      (setf moves 
-        (cons (list row col) moves))
-      )))
-  ;; return vector form of moves
+	 (new-posn (first (gomoku-move-history game)))
+	 (i (posn->row new-posn))
+	 (j (posn->col new-posn)))
+    ;; go through the +- 4 tokens around the new-posn
+    (dotimes (token 24)
+      (let* ((r-c (aref *neighbors* token 0))
+	     (c-c (aref *neighbors* token 1))
+	     (row (+ i r-c))
+	     (col (+ j c-c)))
+	;; If the move is legal 
+	(when (is-legal? game row col)
+	  ;; add the position array to moves 
+	  (push (list row col) moves))
+	))
+    ;; return vector form of moves
     moves))
 
 
 ;;  DO-MOVE!
 ;; -------------------------------------
-;;  INPUTS:  GAME, an GOMOKU struct
+;;  INPUTS:  GAME, an gomoku struct
 ;;           CHECK-LEGAL?, T or NIL
 ;;           ROW, COL, two integers (between 0 and 14)
 ;;  OUTPUT:  The modified GAME
@@ -222,9 +276,10 @@
 
 (defun do-move! (game check-legal? row col)
   (let ((plr (gomoku-whose-turn game))
-    (board (gomoku-board game)))
-
-  ;(format t "do-move!~%")
+	(board (gomoku-board game))
+	(current-movs (gomoku-legal-moves game)))
+    
+    ;;(format t "do-move!~%")
     ;; Case 1: check if it's a legal move when check-legal is true
     (when (and check-legal? (not (is-legal? game row col)))
       (return-from do-move! game))
@@ -235,20 +290,44 @@
     (decf (gomoku-num-open game))
     ;; 3. toggle player
     (toggle-player! game)
-    ;; 4. set the new-posn to this move
-    (setf (gomoku-new-posn game) (row-col->posn row col))
+    ;; 4. add the newest move to move-history
+    (push (row-col->posn row col) (gomoku-move-history game))
     ;; 5. set the legal moves for the game
-    (setf (gomoku-legal-moves game) 
-      (append (gen-legal-moves game) (gomoku-legal-moves game)))
-    ;; 6. push move into move-history
-    (push (list row col) (gomoku-move-history game))
+    ;; (format t "~A ~A~%" current-movs (list-length current-movs))
+    (setf current-movs (remove (list row col) current-movs :test #'equal))
+    (setf (gomoku-legal-moves game)
+	  (remove-duplicates
+	   (append (gen-legal-moves game) current-movs) :test #'equal))
     ;; return the game
     game))
 
 
+;; UNDO-MOVE
+;; -----------------------------
+(defun undo-move! (game)
+  (cond
+   ;; Case 1:  No moves on move history!
+   ((null (gomoku-move-history game))
+    (format t "Can't undo move...empty history!~%")
+    game)
+   
+   ;; Case 2:  There is a move to undo...
+   (t
+    (let ((new-posn (pop (gomoku-move-history game)))
+      (bored (gomoku-board game)))
+    ;; 1. remove piece from board
+    (place-token-at-posn bored *blank* new-posn)
+    ;; 2. increase the number of empty slots available on the board
+    (incf (gomoku-num-open game))
+    ;; 3. toggle player
+    (toggle-player! game)
+    ;; 4. pop the latest move from move-history ;; DONE
+    game))))
+
+
 ;;  RANDOM-MOVE
 ;; ------------------------------------------
-;;  INPUT:  GAME, an GOMOKU struct
+;;  INPUT:  GAME, an gomoku struct
 ;;  OUTPUT:  One of the legal moves available to the current
 ;;   player, chosen randomly.
 
@@ -261,7 +340,7 @@
 
 ;;  DO-RANDOM-MOVE!
 ;; ------------------------------------------------
-;;  INPUT:   GAME, an GOMOKU struct
+;;  INPUT:   GAME, an gomoku struct
 ;;  OUTPUT:  The modified game
 ;;  SIDE EFFECT:  Destructively modifies GAME by doing one of the 
 ;;   legal moves available to the current player, chosen randomly.
@@ -271,56 +350,14 @@
     (do-move! game nil (first chosenmove) (second chosenmove))))
 
 
-
-;; UNDO-MOVE
-;; -----------------------------
-
-(defun undo-move! (g)
-  (cond
-   ;; Case 1:  No moves on move history!
-   ((null (gomoku-move-history g))
-    (format t "Umm... Can't undo move... empty history!~%")
-    g)
-   
-   ;; Case 2:  There is a move to undo...
-   (t
-    (let* ((move (pop (gomoku-move-history g)))
-     (bored (gomoku-board g))
-     (r1 (first move))
-     (c1 (second move))
-     (r2 (third move))
-     (c2 (fourth move))
-     (piece (aref bored r2 c2))
-     (destn (fifth move))
-     (opponent (gomoku-whose-turn? g)))
-      (when (aref bored r1 c1)
-  (format t "Gonna undo move, but something was on source square!~%"))
-      (when (null piece)
-  (format t "Wanna undo a move, but there's no piece at destn!~%"))
-      (when (and destn (not (eq opponent (piece-owner destn))))
-  (format t "Umm... opponent not owner of captured piece~%"))
-      ;; remove piece from (r2,c2)
-      (setf (aref bored r2 c2) nil)
-      ;; if necessary, restore previously captured piece to (r2,c2)
-      (when destn (put-piece! g destn))
-      ;; move piece back to (r1,c1)
-      (setf (aref bored r1 c1) piece)
-      (setf (piece-row piece) r1)
-      (setf (piece-col piece) c1)
-      ;; Toggle the turn!
-      (toggle-turn! g)
-      ;; Return the CHESS struct
-      g))))
-
-
 ;;  GAME-OVER?
 ;; -----------------------------
-;;  INPUT:  GAME, an GOMOKU struct
+;;  INPUT:  GAME, an gomoku struct
 ;;  OUTPUT:  If not over, return NIL. If game over, return the winner of the game.
 ;;           Return 0 if draw. 
 
 (defun game-over? (game)
-  (let ((current (gomoku-new-posn game))
+  (let ((current (first (gomoku-move-history game)))
         (plr (other-player (gomoku-whose-turn game)))
         (sum 0)
         (board (gomoku-board game)))
@@ -330,26 +367,26 @@
     ;; counting tokens of current color in 8 directions
     ;; and adding the number of two opposite directions together
     (dotimes (dirn 8)
-           (let* ((count 0)
-                 (cr (posn->row current))
-                 (cc (posn->col current))
-                 (dr (aref *dirns* dirn 0))
-                 (dc (aref *dirns* dirn 1)))
-             ;; record number of consecutive token of plr color
-             (while (and (not (off-board? cr cc)) (= (aref board cr cc) plr))
-                    (incf count)
-                    (setf cr (+ cr dr))
-                    (setf cc (+ cc dc)))
-             ;; if it is a new direction, record sum
-             (if (evenp dirn) 
-                 (setf sum count)
-                 ;; otherwise we have already the number of tokens in the opposite 
-                 ;; directions. Thus we add them together
-                 ;; -1 because we double count the token in the middle
-                 (setf sum (+ (- sum 1) count)))
-             (when (> sum 4)
-                 (return-from game-over? plr)))))
-
+      (let* ((count 0)
+	     (cr (posn->row current))
+	     (cc (posn->col current))
+	     (dr (aref *dirns* dirn 0))
+	     (dc (aref *dirns* dirn 1)))
+	;; record number of consecutive token of plr color
+	(while (and (not (off-board? cr cc)) (= (aref board cr cc) plr))
+	  (incf count)
+	  (setf cr (+ cr dr))
+	  (setf cc (+ cc dc)))
+	;; if it is a new direction, record sum
+	(if (evenp dirn) 
+	    (setf sum count)
+	  ;; otherwise we have already the number of tokens in the opposite 
+	  ;; directions. Thus we add them together
+	  ;; -1 because we double count the token in the middle
+	  (setf sum (+ (- sum 1) count)))
+	(when (> sum 4)
+	  (return-from game-over? plr)))))
+  
   (when (= (gomoku-num-open game) 0)
     (return-from game-over? 0))
   nil)
@@ -357,7 +394,7 @@
 
 ;;  DEFAULT-POLICY
 ;; ---------------------------------------------------------------------------
-;;  INPUT:  GAME, an GOMOKU struct
+;;  INPUT:  GAME, an gomoku struct
 ;;  OUTPUT: The result (from black's perspective) of playing out the
 ;;    current game using randomly selected moves.  The amount of the
 ;;    win/loss is reported by the SQUARE-ROOT of the absolute difference
@@ -366,36 +403,30 @@
 ;;    then black wins by 6 tokens, and the output is approximately 2.45.
 
 (defun default-policy
-  (game)
+    (game)
   ;; Do random moves until the game is over
-  (let ((winner (game-over? game)))
+  (let ((winner (game-over? game))
+	(val 0))
     ;; return the winner of the game
     (while (not winner)
-           (do-random-move! game)
-           (setf winner (game-over? game)))
-    (* (- winner) (sqrt (sqrt (gomoku-num-open game))))))
-
-;;  EVAL-FUNC
-;; -------------------------------------------------
-;;  INPUT:  GAME, a GOMOKU struct
-;;  OUTPUT:  The static evaluation of the current state of the game
-;;           based on the difference in piece values held by 
-;;           the two players.
-
-;; count consecutive 3 & 4
-;; and whether surrounded by open space or opposite token
+      (do-random-move! game)
+      (setf winner (game-over? game)))
+    (setf val (eval-func game))
+    (/ val 1000000)))
 
 
-;; eval-helper
-;; return a 3-D array (PLR, BLOCK, NUM) of counter
-;; plr - black(0) or white(1)
-;; block - open(0), block on one side(1), block on both side(2)
-;; num - num consecutive tokens
-;; value is the number of n consecutive tokens
+;;  EVAL-HELPER
+;; ---------------------------------------------------------------------------
+;;  INPUT:  GAME, an gomoku struct
+;;  OUTPUT: a 3-D array (PLR, BLOCK, LENGTH) of counter
+;;          PLR - black(0) or white(1)
+;;          BLOCK - open(0), block on one side(1), block on both side(2)
+;;          LENGTH - length of consecutive tokens
+;;          value is the number of n consecutive tokens
 ;; EXAMPLE: number of black open 3 consecutive is stored in (0,0,3)
 
 (defun eval-helper
-       (game)
+    (game)
   (let ((board (gomoku-board game))
         (count (make-array '(2 3 5) :initial-element 0)))
     ;; horizontally
@@ -409,37 +440,39 @@
         (dotimes (j 16)
           (if (= j 15)
               (setf curr *border*)
-              (setf curr (aref board i j)))
+	    (setf curr (aref board i j)))
           ;;(format t "zuobiao 1~a ~a" i j)
-
+	  
           ;;(format t "zuobiao 2~a ~a" i j)
           (cond ((= curr last)
-                (incf counter)
-                (when (> counter 5)
-                      (setf counter 5)))
-            (t
-              ;;(format t "zuobiao last ~a ~a~%" i j)
-              (if (= curr *blank*)
-                (setf afterblock 0)
-                (setf afterblock 1))
-              (cond ((= last *white*) 
-                     (incf (aref count 1 (+ beforeblock afterblock) (- counter 1)))
-                     (setf counter 1)
-                     (setf beforeblock 1))
-                    ((= last *black*)
-                     (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))
-                     ;;(format t "~a ~a ~a ~%" i j counter)
-                     (setf counter 1)
-                     (setf beforeblock 1))
-                    ((= last *blank*)
-                     (setf counter 1)
-                     (setf beforeblock 0)))
-              (setf last curr))
-          ;;(format t "zuobiao 3~a ~a" i j)
-          ))))
+		 (incf counter)
+		 (when (> counter 5)
+		   (setf counter 5)))
+		(t
+		 ;;(format t "zuobiao last ~a ~a~%" i j)
+		 (if (= curr *blank*)
+		     (setf afterblock 0)
+		   (setf afterblock 1))
+		 (cond ((= last *white*) 
+			(incf (aref count 1
+				    (+ beforeblock afterblock) (- counter 1)))
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *black*)
+			(incf (aref count 0
+				    (+ beforeblock afterblock) (- counter 1)))
+			;;(format t "~a ~a ~a ~%" i j counter)
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *blank*)
+			(setf counter 1)
+			(setf beforeblock 0)))
+		 (setf last curr))
+		;;(format t "zuobiao 3~a ~a" i j)
+		))))
     ;;(format t "counte ~a ~%" count)
     ;; vertically
-        (dotimes (j 15)
+    (dotimes (j 15)
       (let ((curr 0)
             (last *border*)
             (beforeblock 1)
@@ -448,242 +481,280 @@
         (dotimes (i 16)
           (if (= i 15)
               (setf curr *border*)
-              (setf curr (aref board i j)))
+	    (setf curr (aref board i j)))
           ;;(format t "zuobiao 1~a ~a" i j)
-
+	  
           ;;(format t "zuobiao 2~a ~a" i j)
           (cond ((= curr last)
-                (incf counter)
-                (when (> counter 5)
-                      (setf counter 5)))
-            (t
-              ;;(format t "zuobiao last ~a ~a~%" i j)
-              (if (= curr *blank*)
-                (setf afterblock 0)
-                (setf afterblock 1))
-              (cond ((= last *white*) 
-                     (incf (aref count 1 (+ beforeblock afterblock) (- counter 1)))
-                     (setf counter 1)
-                     (setf beforeblock 1))
-                    ((= last *black*)
-                     (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))
-                     ;;(format t "~a ~a ~a ~%" i j counter)
-                     (setf counter 1)
-                     (setf beforeblock 1))
-                    ((= last *blank*)
-                     (setf counter 1)
-                     (setf beforeblock 0)))
-              (setf last curr))
-          ;;(format t "zuobiao 3~a ~a" i j)
-          ))))
+		 (incf counter)
+		 (when (> counter 5)
+		   (setf counter 5)))
+		(t
+		 ;;(format t "zuobiao last ~a ~a~%" i j)
+		 (if (= curr *blank*)
+		     (setf afterblock 0)
+		   (setf afterblock 1))
+		 (cond ((= last *white*) 
+			(incf (aref count 1
+				    (+ beforeblock afterblock) (- counter 1)))
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *black*)
+			(incf (aref count 0
+				    (+ beforeblock afterblock) (- counter 1)))
+			;;(format t "~a ~a ~a ~%" i j counter)
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *blank*)
+			(setf counter 1)
+			(setf beforeblock 0)))
+		 (setf last curr))
+		;;(format t "zuobiao 3~a ~a" i j)
+		))))
     ;; diagonally
     ;; letfdown from first row
-
-    ;(format t "letfdown before ~a~%" count)
+    
     (dotimes (k 14)
       ;;(format t "leftdown ~a th ~%" k)
-    (let ((curr 0)
-          (last *border*)
-          (beforeblock 1)
-          (afterblock 0)
-          (counter 1)
-          (i 0)
-          (j k))
-      (while (not (off-board? i j))
-             ;;(format t "letfdown ~a ~a~%" i j)
-             (setf curr (aref board i j))
-              (cond ((= curr last)
-                    (incf counter)
-                    (when (> counter 5)
-                      (setf counter 5)))
+      (let ((curr 0)
+	    (last *border*)
+	    (beforeblock 1)
+	    (afterblock 0)
+	    (counter 1)
+	    (i 0)
+	    (j k))
+	(while (not (off-board? i j))
+	  ;;(format t "letfdown ~a ~a~%" i j)
+	  (setf curr (aref board i j))
+	  (cond ((= curr last)
+		 (incf counter)
+		 (when (> counter 5)
+		   (setf counter 5)))
                 (t
-                  ;;(format t "zuobiao last ~a ~a~%" i j)
-                  (if (= curr *blank*)
-                    (setf afterblock 0)
-                    (setf afterblock 1))
-                  (cond ((= last *white*) 
-                         (incf (aref count 1 (+ beforeblock afterblock) (- counter 1)))
-                         (setf counter 1)
-                         (setf beforeblock 1))
-                        ((= last *black*)
-                         (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))
-                         ;;(format t "~a ~a ~a ~%" i j counter)
-                         (setf counter 1)
-                         (setf beforeblock 1))
-                        ((= last *blank*)
-                         (setf counter 1)
-                         (setf beforeblock 0)))
-                  (setf last curr)))
-             (incf i)
-             (decf j))
-      (setf afterblock 1)
-      (cond ((= last *white*) 
-             (incf (aref count 1 (+ beforeblock afterblock) (- counter 1))))
-            ((= last *black*)
-             (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))))))
-    ;(format t "letfdown from first row ~a~%" count)
-
+		 ;;(format t "zuobiao last ~a ~a~%" i j)
+		 (if (= curr *blank*)
+		     (setf afterblock 0)
+		   (setf afterblock 1))
+		 (cond ((= last *white*) 
+			(incf (aref count 1 (+ beforeblock afterblock) (- counter 1)))
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *black*)
+			(incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))
+			;;(format t "~a ~a ~a ~%" i j counter)
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *blank*)
+			(setf counter 1)
+			(setf beforeblock 0)))
+		 (setf last curr)))
+	  (incf i)
+	  (decf j))
+	(setf afterblock 1)
+	(cond ((= last *white*) 
+	       (incf (aref count 1
+			   (+ beforeblock afterblock) (- counter 1))))
+	      ((= last *black*)
+	       (incf (aref count 0
+			   (+ beforeblock afterblock) (- counter 1)))))))
+				
+    
     ;; letfdown from last column    
     (dotimes (k 15)
       ;;(format t "leftdown ~a th ~%" k)
-    (let ((curr 0)
-          (last *border*)
-          (beforeblock 1)
-          (afterblock 0)
-          (counter 1)
-          (i k)
-          (j 14))
-      (while (not (off-board? i j))
-             ;;(format t "letfdown ~a ~a~%" i j)
-             (setf curr (aref board i j))
-              (cond ((= curr last)
-                    (incf counter)
-                    (when (> counter 5)
-                      (setf counter 5)))
+      (let ((curr 0)
+	    (last *border*)
+	    (beforeblock 1)
+	    (afterblock 0)
+	    (counter 1)
+	    (i k)
+	    (j 14))
+	(while (not (off-board? i j))
+	  ;;(format t "letfdown ~a ~a~%" i j)
+	  (setf curr (aref board i j))
+	  (cond ((= curr last)
+		 (incf counter)
+		 (when (> counter 5)
+		   (setf counter 5)))
                 (t
-                  ;;(format t "zuobiao last ~a ~a~%" i j)
-                  (if (= curr *blank*)
-                    (setf afterblock 0)
-                    (setf afterblock 1))
-                  (cond ((= last *white*) 
-                         (incf (aref count 1 (+ beforeblock afterblock) (- counter 1)))
-                         (setf counter 1)
-                         (setf beforeblock 1))
-                        ((= last *black*)
-                         (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))
-                         ;;(format t "~a ~a ~a ~%" i j counter)
-                         (setf counter 1)
-                         (setf beforeblock 1))
-                        ((= last *blank*)
-                         (setf counter 1)
-                         (setf beforeblock 0)))
-                  (setf last curr)))
-             (incf i)
+		 ;;(format t "zuobiao last ~a ~a~%" i j)
+		 (if (= curr *blank*)
+		     (setf afterblock 0)
+		   (setf afterblock 1))
+		 (cond ((= last *white*) 
+			(incf (aref count 1
+				    (+ beforeblock afterblock) (- counter 1)))
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *black*)
+			(incf (aref count 0
+				    (+ beforeblock afterblock) (- counter 1)))
+			;;(format t "~a ~a ~a ~%" i j counter)
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *blank*)
+			(setf counter 1)
+			(setf beforeblock 0)))
+		 (setf last curr)))
+	  (incf i)
              (decf j))
-      (setf afterblock 1)
+	(setf afterblock 1)
       (cond ((= last *white*) 
              (incf (aref count 1 (+ beforeblock afterblock) (- counter 1))))
             ((= last *black*)
              (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))))))
-        ;(format t "letfdown from first row ~a~%" count)
-
+		
+    
     ;; leftup from last column
     (dotimes (k 14)
       ;;(format t "leftup ~a th ~%" k)
       (let ((curr 0)
-          (last *border*)
-          (beforeblock 1)
-          (afterblock 0)
-          (counter 1)
-          (i k)
-          (j 14))
-      (while (not (off-board? i j))
-             ;;(format t "letfdown ~a ~a~%" i j)
-             (setf curr (aref board i j))
-              (cond ((= curr last)
-                    (incf counter)
-                    (when (> counter 5)
-                      (setf counter 5)))
+	    (last *border*)
+	    (beforeblock 1)
+	    (afterblock 0)
+	    (counter 1)
+	    (i k)
+	    (j 14))
+	(while (not (off-board? i j))
+	  ;;(format t "letfdown ~a ~a~%" i j)
+	  (setf curr (aref board i j))
+	  (cond ((= curr last)
+		 (incf counter)
+		 (when (> counter 5)
+		   (setf counter 5)))
                 (t
-                  (if (= curr *blank*)
-                    (setf afterblock 0)
-                    (setf afterblock 1))
-                  (cond ((= last *white*) 
-                         (incf (aref count 1 (+ beforeblock afterblock) (- counter 1)))
+		 (if (= curr *blank*)
+		     (setf afterblock 0)
+		   (setf afterblock 1))
+		 (cond ((= last *white*) 
+			(incf (aref count 1
+				    (+ beforeblock afterblock) (- counter 1)))
                          (setf counter 1)
                          (setf beforeblock 1))
                         ((= last *black*)
-                         (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))
+                         (incf (aref count 0
+				     (+ beforeblock afterblock) (- counter 1)))
                          ;;(format t "~a ~a ~a ~%" i j counter)
                          (setf counter 1)
                          (setf beforeblock 1))
                         ((= last *blank*)
                          (setf counter 1)
                          (setf beforeblock 0)))
-                  (setf last curr)))
-             (decf i)
-             (decf j))
-      (setf afterblock 1)
-      (cond ((= last *white*) 
-             (incf (aref count 1 (+ beforeblock afterblock) (- counter 1))))
-            ((= last *black*)
-             (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))))))
-     ;(format t "leftup from last col ~a~%" count)
-
+		 (setf last curr)))
+	  (decf i)
+	  (decf j))
+	(setf afterblock 1)
+	(cond ((= last *white*) 
+	       (incf (aref count 1
+			   (+ beforeblock afterblock) (- counter 1))))
+	      ((= last *black*)
+	       (incf (aref count 0
+			   (+ beforeblock afterblock) (- counter 1)))))))
+				
     ;; leftup from last row
     (dotimes (k 15)
       ;;(format t "leftup ~a th ~%" k)
       (let ((curr 0)
-          (last *border*)
-          (beforeblock 1)
-          (afterblock 0)
-          (counter 1)
-          (i 14)
-          (j k))
-      (while (not (off-board? i j))
-             ;;(format t "letfdown ~a ~a~%" i j)
-             (setf curr (aref board i j))
-              (cond ((= curr last)
-                    (incf counter)
-                    (when (> counter 5)
-                      (setf counter 5)))
+	    (last *border*)
+	    (beforeblock 1)
+	    (afterblock 0)
+	    (counter 1)
+	    (i 14)
+	    (j k))
+	(while (not (off-board? i j))
+	  ;;(format t "letfdown ~a ~a~%" i j)
+	  (setf curr (aref board i j))
+	  (cond ((= curr last)
+		 (incf counter)
+		 (when (> counter 5)
+		   (setf counter 5)))
                 (t
-                  (if (= curr *blank*)
-                    (setf afterblock 0)
-                    (setf afterblock 1))
-                  (cond ((= last *white*) 
-                         (incf (aref count 1 (+ beforeblock afterblock) (- counter 1)))
-                         (setf counter 1)
-                         (setf beforeblock 1))
-                        ((= last *black*)
-                         (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))
-                         ;;(format t "~a ~a ~a ~%" i j counter)
-                         (setf counter 1)
-                         (setf beforeblock 1))
-                        ((= last *blank*)
-                         (setf counter 1)
-                         (setf beforeblock 0)))
-                  (setf last curr)))
-             (decf i)
-             (decf j))
-      (setf afterblock 1)
-      (cond ((= last *white*) 
-             (incf (aref count 1 (+ beforeblock afterblock) (- counter 1))))
-            ((= last *black*)
-             (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))))))
+		 (if (= curr *blank*)
+		     (setf afterblock 0)
+		   (setf afterblock 1))
+		 (cond ((= last *white*) 
+			(incf (aref count 1
+				    (+ beforeblock afterblock) (- counter 1)))
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *black*)
+			(incf (aref count 0
+				    (+ beforeblock afterblock) (- counter 1)))
+			;;(format t "~a ~a ~a ~%" i j counter)
+			(setf counter 1)
+			(setf beforeblock 1))
+		       ((= last *blank*)
+			(setf counter 1)
+			(setf beforeblock 0)))
+		 (setf last curr)))
+	  (decf i)
+	  (decf j))
+	(setf afterblock 1)
+	(cond ((= last *white*) 
+	       (incf (aref count 1
+			   (+ beforeblock afterblock) (- counter 1))))
+	      ((= last *black*)
+	       (incf (aref count 0
+			   (+ beforeblock afterblock) (- counter 1)))))))
     count))
 
 
+;;  EVAL-FUNC
+;; -------------------------------------------------
+;;  INPUT:  GAME, a gomoku struct
+;;  OUTPUT:  The static evaluation of the current state of the game
+;;           based on the difference in piece values held by 
+;;           the two players.
+
+;; count consecutive 3 & 4
+;; and whether surrounded by open space or opposite token
 
 
 (defun eval-func
     (game)
   (let* ((count (eval-helper game))
-      (black-score
-        (+ (* *one* (aref count 0 0 0))
-           (* *two* (aref count 0 0 1))
-           (* *three* (aref count 0 0 2))
-           (* *four* (aref count 0 0 3))
-           (* *block-one* (aref count 0 1 0))
-           (* *block-two* (aref count 0 1 1))
-           (* *block-three* (aref count 0 1 2))
-           (* *block-four* (aref count 0 1 3))
-           (* *five* 
-              (+ (aref count 0 0 4) (aref count 0 1 4) (aref count 0 1 4)))))
-      (white-score
-        (+ (* *one* (aref count 1 0 0))
-           (* *two* (aref count 1 0 1))
-           (* *three* (aref count 1 0 2))
-           (* *four* (aref count 1 0 3))
-           (* *block-one* (aref count 1 1 0))
-           (* *block-two* (aref count 1 1 1))
-           (* *block-three* (aref count 1 1 2))
-           (* *block-four* (aref count 1 1 3))
-           (* *five* 
-              (+ (aref count 1 0 4) (aref count 1 1 4) (aref count 1 1 4))))))
-      (- black-score white-score)))
-      
+	 (black-score
+	  (+ (* *one* (aref count 0 0 0))
+	     (* *two* (aref count 0 0 1))
+	     (* *three* (aref count 0 0 2))
+	     (* *four* (aref count 0 0 3))
+	     (* *block-one* (aref count 0 1 0))
+	     (* *block-two* (aref count 0 1 1))
+	     (* *block-three* (aref count 0 1 2))
+	     (* *block-four* (aref count 0 1 3))
+	     (* *five* 
+		(+ (aref count 0 0 4) (aref count 0 1 4) (aref count 0 1 4)))))
+	 (white-score
+	  (+ (* *one* (aref count 1 0 0))
+	     (* *two* (aref count 1 0 1))
+	     (* *three* (aref count 1 0 2))
+	     (* *four* (aref count 1 0 3))
+	     (* *block-one* (aref count 1 1 0))
+	     (* *block-two* (aref count 1 1 1))
+	     (* *block-three* (aref count 1 1 2))
+	     (* *block-four* (aref count 1 1 3))
+	     (* *five* 
+		(+ (aref count 1 0 4) (aref count 1 1 4) (aref count 1 1 4))))))
+    (- black-score white-score)))
+
 
     
 
 
+;;  SETUP-GOMOKU
+;; ---------------------------------------
+;;  INPUT:  LIST-O-MOVES, a list of "moves" where each move is 
+;;             a list of 4 numbers (of the kind used by do-move!)
+;;  OUTPUT:  A GOMOKU struct representing a new game in which
+;;    the moves in LIST-O-MOVES have been done.
+
+(defun setup-gomoku (list-o-moves)
+  (let ((g (new-gomoku)))
+    ;; For each move in the LIST-O-MOVES...
+    (mapcar #'(lambda (movie)
+    ;; Do the move...
+    (apply #'do-move! g nil movie))
+      list-o-moves)
+    g
+    ))
+ 

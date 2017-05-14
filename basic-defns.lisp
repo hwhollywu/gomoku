@@ -15,12 +15,12 @@
 
 
 (defparameter *list-o-files* 
-    (list "basic-defns"        ;; this file
-	  "gomoku-macros"     ;; macros, etc.   
-	  "gomoku"    ;; struct and basics
-	  "mcts"
-      "alpha-beta"
-	  )) 
+    (list "basic-defns"        
+	  "gomoku-macros"
+    "gomoku"     
+	"mcts"
+    "alpha-beta"
+    "testing")) 
 
 ;;  MAKER
 ;; ------------------------------------------------

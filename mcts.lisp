@@ -98,7 +98,7 @@
 	 (num-moves (length moves))
 	 (nodey (make-mc-node 
 		 :key key
-		 :veck-moves moves
+		 :veck-moves  (make-array num-moves :initial-contents moves)
 		 :veck-visits (make-array num-moves :initial-element 0)
 		 :veck-scores (make-array num-moves :initial-element 0)
 		 :whose-turn (whose-turn game))))
@@ -118,7 +118,7 @@
   (let* ((player (mc-node-whose-turn nodey))
 	 (moves (mc-node-veck-moves nodey))
 	 (num-moves (length moves)))
-  (cond
+    (cond
      ;; No legal moves!
      ((= num-moves 0)
       ;; signal failure
@@ -268,11 +268,14 @@
     (orig-game num-sims c)
   ;; Want to use COPY of GAME struct for simulations...
   ;; That way, can reset game struct before each simulation...
+
+    	;;(format t "SHENMEGUI")
   (let* ((tree (new-mc-tree orig-game))
 	 (hashy (mc-tree-hashy tree))
 	 ;;(player (whose-turn orig-game))
 	 )
     (dotimes (i num-sims)
+      ;;	(format t "~A" i)
       (let* (;; Work with a COPY of the original game struct
 	     (game (copy-game orig-game))
 	     ;; Phase 1:  SIM-TREE Destructively modifies game
@@ -282,46 +285,22 @@
 	;; Finally, backup the results
 	(backup hashy key-move-acc playout-result)))				   
     ;; Select the best move (using c = 0 because we are not exploring anymore)
-    (let* ((rootie (get-root-node tree))
+     (let* ((rootie (get-root-node tree))
 	   (mv-index (select-move rootie 0))
-	   (move (svref (mc-node-veck-moves rootie) mv-index))
-	   (scores (mc-node-veck-scores rootie))
-	   (score (svref scores mv-index)))
+	   (move (svref (mc-node-veck-moves rootie) mv-index)))
+	  ;; (scores (mc-node-veck-scores rootie))
+	  ;; (score (svref scores mv-index)))
       ;; Display some stats along with the best move
-      (format t "Best score: ~5,3F score veck: " score)
-      (dotimes (i (length scores))
-	(format t "~5,3F, " (svref scores i)))
-      (format t "~%")
-      (format t "Visits veck: ")
-      (dotimes (i (length scores))
-	(format t "~A " (svref (mc-node-veck-visits rootie) i)))
-      (format t "~%")
+      ;;   (format t "Best score: ~5,3F score veck: " score)
+      ;;     (dotimes (i (length scores))
+      ;;	(format t "~5,3F, " (svref scores i)))
+      ;;     (format t "~%")
+      ;;    (format t "Visits veck: ")
+      ;;    (dotimes (i (length scores))
+      ;;	(format t "~A " (svref (mc-node-veck-visits rootie) i)))
+      ;;    (format t "~%")
       ;; Output the move
       move)))
-
-;;  COMPETE
-;; --------------------------------------------------
-;;  INPUTS:  BLACK-NUM-SIMS, the number of simulations for each of black's moves
-;;           BLACK-C, the exploration/exploitation constant used by black
-;;           WHITE-NUM-SIMS, the number of simulations for each of white's moves
-;;           WHITE-C, the exploration/exploitation constant used by white
-;;  OUTPUT:  Don't care
-;;  SIDE EFFECT:  Displays the entire game using UCT-SEARCH to compute best moves
-;;    for both players according to the specified parameters.
-
-(defun compete
-    (black-num-sims black-c white-num-sims white-c)
-  (let ((g (new-gomoku)))
-    (while (not (game-over? g))
-      (cond
-       ((eq (whose-turn g) *black*)
-	(format t "BLACK'S TURN!~%")
-	(format t "~A~%" 
-		(apply #'do-move! g nil (uct-search g black-num-sims black-c))))
-       (t
-	(format t "WHITE'S TURN!~%")
-	(format t "~A~%"
-		(apply #'do-move! g nil (uct-search g white-num-sims white-c))))))))
 
 
 

@@ -61,7 +61,8 @@
      
      ;; Recursive Case:  Need to do minimax with alpha-beta pruning
      (t
-      (let ((moves (gomoku-legal-moves g))) ;; (randomize (legal-moves g))
+      (let* ((moves (gomoku-legal-moves g))
+      (orig-legal-moves (copy-list moves))) 
 	(incf (stats-num-potential-moves statty) (length moves))
 	(dolist (mv moves)
 	  (incf (stats-num-moves-done statty))
@@ -69,6 +70,7 @@
 	  (let ((child-val (compute-min g (1+ curr-depth) alpha beta
 					statty cutoff-depth)))
 	    (undo-move! g)
+	    (setf (gomoku-legal-moves g) (copy-list orig-legal-moves))
 	    ;; Check for updating ALPHA value...
 	    (when (> child-val alpha)
 	      (setf alpha child-val)
@@ -119,7 +121,8 @@
    
    ;; Otherwise, we need to use recursion!
    (t
-    (let ((moves (gomoku-legal-moves g))) ;; (randomize (legal-moves g))
+    (let* ((moves (gomoku-legal-moves g))
+    	(orig-legal-moves (copy-list moves))) 
       (incf (stats-num-potential-moves statty) (length moves))
       (dolist (mv moves)
 	(incf (stats-num-moves-done statty))
@@ -127,6 +130,7 @@
 	(let ((child-val (compute-max g (1+ curr-depth) alpha beta
 				      statty cutoff-depth)))
 	  (undo-move! g)
+	  (setf (gomoku-legal-moves g) (copy-list orig-legal-moves))
 	  ;; Update BETA value if necessary...
 	  (when (< child-val beta)
 	    (setf beta child-val)
@@ -140,4 +144,21 @@
 
 
 
+;;  COMPUTE-DO-AND-SHOW-N-MOVES
+;; ------------------------------------------
+;;  INPUTS:  G, a CHESS struct
+;;           N, a positive integer
+;;           CUTOFF-DEPTH, the cutoff depth for minimax
+;;  OUTPUT:  don't care
+;;  SIDE EFFECT:  Computes, does, and shows the results of N
+;;                moves generated using COMPUTE-MOVE.
+
+(defun compute-do-and-show-n-moves
+    (g n cutoff-depth)
+  (let ((mv nil))
+    (dotimes (i n)
+      (format t "~%~A~%" g)
+      (setf mv (compute-move g cutoff-depth))
+      (apply #'do-move! g nil mv))
+    (format t "~%~A~%" g)))
 
