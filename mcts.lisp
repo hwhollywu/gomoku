@@ -1,32 +1,8 @@
 ;; ========================================
 ;;  CMPU-365, Spring 2017
-;;  Monte Carlo Tree Search and Othello
+;;  Monte Carlo Tree Search 
+;;  Lilian Zhao and Hao Wu
 ;; ========================================
-
-;;  Calls the following domain dependent functions
-;; ----------------------------------------------------
-;;     COPY-GAME
-;;     LEGAL-MOVES  --  returns VECTOR of legal moves
-;;     MAKE-HASH-KEY-FROM-GAME
-;;     WHOSE-TURN -- returns *BLACK* or *WHITE*
-;;     GAME-OVER? -- 
-;;     DEFAULT-POLICY  --  returns random legal move
-;;     DO-MOVE!
-
-;;  Defines the following functions:
-;; ----------------------------------------------------------
-;;     GET-ROOT-NODE
-;;     NEW-MC-TREE
-;;     INSERT-NEW-NODE
-;;     SIM-TREE
-;;     SIM-DEFAULT
-;;     BACKUP
-;;     UCT-SEARCH
-;;     COMPETE
-;;     SELECT-MOVE
-
-;;  WHAT TO DO IF A PLAYER HAS *NO* LEGAL MOVES, BUT GAME ISN'T OVER?
-;;    Player is forced to pass...
 
 
 ;;  MC-NODE struct -- a node in the MCTS tree

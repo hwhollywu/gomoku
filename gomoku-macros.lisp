@@ -1,6 +1,7 @@
 ;; ===============================================
 ;;  CMPU-365, Spring 2017
 ;;  FILE:  gomoku-macros.lisp
+;;  Lilian Zhao and Hao Wu
 ;; ===============================================
 
 ;;  Some useful constants

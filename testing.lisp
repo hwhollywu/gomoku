@@ -1,3 +1,8 @@
+;; ====================================
+;;  CMPU-365, Spring 2017
+;;  Testing functions for GOMOKU
+;;  Lilian Zhao and Hao Wu
+;; ====================================
 
 ;;  COMPETE
 ;; --------------------------------------------------
@@ -52,7 +57,8 @@
        (t
 	(format t "WHITE'S TURN!~%")
 	(format t "~A~%"
-		(apply #'do-move! g nil (uct-search g num-sims c))))))))
+		(apply #'do-move! g nil (uct-search g num-sims c))))))
+    (format t "~A~%" (eval-func g))))
 
 
 
@@ -68,5 +74,6 @@
        (t
 	(format t "WHITE'S TURN!~%")
 	(format t "~A~%"
-		(apply #'do-move! g nil (compute-move g depth))))))))
+		(apply #'do-move! g nil (compute-move g depth))))))
+    (format t "~A~%" (eval-func g))))
 
