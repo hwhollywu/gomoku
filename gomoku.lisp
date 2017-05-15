@@ -426,6 +426,35 @@
     (/ val 1000000)))
 
 
+;; constant array used in eval-helper
+;; EVAL-HELPER scan the board in six direction:
+;;      horizontally from left to right from the first column
+;;      vertically downward from the first row
+;;      diagonally to left down direction from the first row
+;;      diagonally to left down direction from the last column
+;;      diagonally to left up direction from the last row
+;;      diagonally to left up direction from the last column
+
+;; *SCAN-STARTS* records where to start in each of the six direction:
+;;               (0 0) represents we start from (0 0): the first token 
+;;               in the first row
+;; *START-DIRNS* records the direction we move to next start point: (1 0) 
+;;               representing moving to the next token in the first row
+;;               - after scanning horizontally from (n 0), we scan 
+;;                 horizontally from (n+1 0)
+;; *SCAN-DIRNS* records the direction we scan: (0 1) represents 
+;;              scanning horizontally)
+
+(defconstant *scan-starts* (make-array '(6 2) :initial-contents
+          '((0 0) (0 0) (0 0) (1 14) (14 0) (13 14))))
+
+(defconstant *start-dirns* (make-array '(6 2) :initial-contents
+          '((1 0) (0 1) (0 1) (1 0) (0 1) (-1 0))))
+
+(defconstant *scan-dirns* (make-array '(6 2)
+                                 :initial-contents
+         '((0 1) (1 0) (1 -1) (1 -1) (-1 -1) (-1 -1))))
+
 ;;  EVAL-HELPER
 ;; ---------------------------------------------------------------------------
 ;;  INPUT:  GAME, a gomoku struct
@@ -437,250 +466,88 @@
 ;; EXAMPLE: number of black open 3 consecutive is stored in (0,0,3)
 
 (defun eval-helper
-    (game)
+  (game)
   (let ((board (gomoku-board game))
-        (count (make-array '(2 3 5) :initial-element 0)))
-    ;; horizontally
-    (dotimes (i 15)
-      (let ((curr 0)
-            (last *border*)
-            (beforeblock 1)
-            (afterblock 0)
-            (counter 1))
-        (dotimes (j 16)
-          (if (= j 15)
-              (setf curr *border*)
-	    (setf curr (aref board i j)))
-	  
-          (cond ((= curr last)
-		 (incf counter)
-		 (when (> counter 5)
-		   (setf counter 5)))
-		(t
-		 (if (= curr *blank*)
-		     (setf afterblock 0)
-		   (setf afterblock 1))
-		 (cond ((= last *white*) 
-			(incf (aref count 1
-				    (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *black*)
-			(incf (aref count 0
-				    (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *blank*)
-			(setf counter 1)
-			(setf beforeblock 0)))
-		 (setf last curr))
-		))))
-    ;; vertically
-    (dotimes (j 15)
-      (let ((curr 0)
-            (last *border*)
-            (beforeblock 1)
-            (afterblock 0)
-            (counter 1))
-        (dotimes (i 16)
-          (if (= i 15)
-              (setf curr *border*)
-	    (setf curr (aref board i j)))
-	  
-          (cond ((= curr last)
-		 (incf counter)
-		 (when (> counter 5)
-		   (setf counter 5)))
-		(t
-		 (if (= curr *blank*)
-		     (setf afterblock 0)
-		   (setf afterblock 1))
-		 (cond ((= last *white*) 
-			(incf (aref count 1
-				    (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *black*)
-			(incf (aref count 0
-				    (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *blank*)
-			(setf counter 1)
-			(setf beforeblock 0)))
-		 (setf last curr))
-		))))
-    ;; diagonally
-    ;; letfdown from first row
-    (dotimes (k 14)
-      (let ((curr 0)
-	    (last *border*)
-	    (beforeblock 1)
-	    (afterblock 0)
-	    (counter 1)
-	    (i 0)
-	    (j k))
-	(while (not (off-board? i j))
-	  (setf curr (aref board i j))
-	  (cond ((= curr last)
-		 (incf counter)
-		 (when (> counter 5)
-		   (setf counter 5)))
-                (t
-		 (if (= curr *blank*)
-		     (setf afterblock 0)
-		   (setf afterblock 1))
-		 (cond ((= last *white*) 
-			(incf (aref count 1 (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *black*)
-			(incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *blank*)
-			(setf counter 1)
-			(setf beforeblock 0)))
-		 (setf last curr)))
-	  (incf i)
-	  (decf j))
-	(setf afterblock 1)
-	(cond ((= last *white*) 
-	       (incf (aref count 1
-			   (+ beforeblock afterblock) (- counter 1))))
-	      ((= last *black*)
-	       (incf (aref count 0
-			   (+ beforeblock afterblock) (- counter 1)))))))
-				
-    
-    ;; letfdown from last column    
-    (dotimes (k 15)
-      (let ((curr 0)
-	    (last *border*)
-	    (beforeblock 1)
-	    (afterblock 0)
-	    (counter 1)
-	    (i k)
-	    (j 14))
-	(while (not (off-board? i j))
-	  (setf curr (aref board i j))
-	  (cond ((= curr last)
-		 (incf counter)
-		 (when (> counter 5)
-		   (setf counter 5)))
-                (t
-		 (if (= curr *blank*)
-		     (setf afterblock 0)
-		   (setf afterblock 1))
-		 (cond ((= last *white*) 
-			(incf (aref count 1
-				    (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *black*)
-			(incf (aref count 0
-				    (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *blank*)
-			(setf counter 1)
-			(setf beforeblock 0)))
-		 (setf last curr)))
-	  (incf i)
-             (decf j))
-	(setf afterblock 1)
-      (cond ((= last *white*) 
-             (incf (aref count 1 (+ beforeblock afterblock) (- counter 1))))
-            ((= last *black*)
-             (incf (aref count 0 (+ beforeblock afterblock) (- counter 1)))))))
-		
-    
-    ;; leftup from last column
-    (dotimes (k 14)
-      (let ((curr 0)
-	    (last *border*)
-	    (beforeblock 1)
-	    (afterblock 0)
-	    (counter 1)
-	    (i k)
-	    (j 14))
-	(while (not (off-board? i j))
-	  (setf curr (aref board i j))
-	  (cond ((= curr last)
-		 (incf counter)
-		 (when (> counter 5)
-		   (setf counter 5)))
-                (t
-		 (if (= curr *blank*)
-		     (setf afterblock 0)
-		   (setf afterblock 1))
-		 (cond ((= last *white*) 
-			(incf (aref count 1
-				    (+ beforeblock afterblock) (- counter 1)))
-                         (setf counter 1)
-                         (setf beforeblock 1))
-                        ((= last *black*)
-                         (incf (aref count 0
-				     (+ beforeblock afterblock) (- counter 1)))
-                         (setf counter 1)
-                         (setf beforeblock 1))
-                        ((= last *blank*)
-                         (setf counter 1)
-                         (setf beforeblock 0)))
-		 (setf last curr)))
-	  (decf i)
-	  (decf j))
-	(setf afterblock 1)
-	(cond ((= last *white*) 
-	       (incf (aref count 1
-			   (+ beforeblock afterblock) (- counter 1))))
-	      ((= last *black*)
-	       (incf (aref count 0
-			   (+ beforeblock afterblock) (- counter 1)))))))
-				
-    ;; leftup from last row
-    (dotimes (k 15)
-      (let ((curr 0)
-	    (last *border*)
-	    (beforeblock 1)
-	    (afterblock 0)
-	    (counter 1)
-	    (i 14)
-	    (j k))
-	(while (not (off-board? i j))
-	  (setf curr (aref board i j))
-	  (cond ((= curr last)
-		 (incf counter)
-		 (when (> counter 5)
-		   (setf counter 5)))
-                (t
-		 (if (= curr *blank*)
-		     (setf afterblock 0)
-		   (setf afterblock 1))
-		 (cond ((= last *white*) 
-			(incf (aref count 1
-				    (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *black*)
-			(incf (aref count 0
-				    (+ beforeblock afterblock) (- counter 1)))
-			(setf counter 1)
-			(setf beforeblock 1))
-		       ((= last *blank*)
-			(setf counter 1)
-			(setf beforeblock 0)))
-		 (setf last curr)))
-	  (decf i)
-	  (decf j))
-	(setf afterblock 1)
-	(cond ((= last *white*) 
-	       (incf (aref count 1
-			   (+ beforeblock afterblock) (- counter 1))))
-	      ((= last *black*)
-	       (incf (aref count 0
-			   (+ beforeblock afterblock) (- counter 1)))))))
-    count))
+    (count (make-array '(2 3 5) : initial-element 0)))
+    ;; scan the board in 6 directions
+    (dotimes (k 6)
+      ;; initialize the start point, how to move the start point, 
+      ;; and the direction of chain to scan
+      (let ((start-r (aref *scan-starts* k 0))
+            (start-c (aref *scan-starts* k 1))
+            (start-dr (aref *start-dirns* k 0))
+            (start-dc (aref *start-dirns* k 1))
+            (dr (aref *scan-dirns* k 0))
+            (dc (aref *scan-dirns* k 1)))
+        ;; if the start point is not off-board, continue
+        ;; (e.g, search from the first row)
+        (while (not (off-board? start-r start-c))
+             (let ((curr 0)
+                   (last *border*)
+                   ;; whether the chain is blocked before
+                   ;; since start from the border, initialized as blocked
+                   (beforeblock 1)
+                   ;; whether the chain is blocked after
+                   (afterblock 0)
+                   ;; initialize counter
+                   (counter 1)
+                   ;; initialize position to start point,
+                   (r start-r)
+                   (c start-c))
+                ;; if current position is not off-board, continue.
+                (while (not (off-board? r c))
+                      ;; get current token
+                      (setf curr (aref board r c))
+                      ;; if current token is same as before, 
+                      ;; increment counter
+                      (cond ((= curr last)
+                             (incf counter)
+                             ;; when there are more than 5, set it to 5
+                             (when (> counter 5)
+                             (setf counter 5)))
+                            ;; otherwise update count to record the chain
+                            (t                        
+                              ;; The previous chain is not blocked after
+                              ;; if and only if current token is *BLANK*
+                              (if (= curr *blank*)
+                                  (setf afterblock 0)
+                                  (setf afterblock 1))
+                              ;; update based on the color of the chain
+                              ;; the next chain is blocked before if and
+                              ;; only if the current token is not *BLANK*
+                              (cond ((= last *white*) 
+                                     (incf (aref count 1 
+                                      (+ beforeblock afterblock) 
+                                      (- counter 1)))
+                                     (setf counter 1)
+                                     (setf beforeblock 1))
+                                    ((= last *black*)
+                                     (incf (aref count 0 
+                                      (+ beforeblock afterblock) 
+                                      (- counter 1)))
+                                     (setf counter 1)
+                                     (setf beforeblock 1))
+                                    ((= last *blank*)
+                                     (setf counter 1)                                  
+                                     (setf beforeblock 0)))
+                              ;; update last token to current token
+                              (setf last curr)))
+                      ;; get next token
+                      (setf r (+ r dr))
+                      (setf c (+ c dc)))
+                ;; record the last chain before we hit the border
+                (setf afterblock 1)
+                (cond ((= last *white*) 
+                       (incf (aref count 1
+                       (+ beforeblock afterblock) (- counter 1))))
+                      ((= last *black*)
+                       (incf (aref count 0
+                       (+ beforeblock afterblock) (- counter 1))))))
+             ;; update start point
+             (setf start-r (+ start-r start-dr))
+             (setf start-c (+ start-c start-dc)))))
+  ;; return the 3-d array count
+  count))
 
 
 ;;  EVAL-FUNC
