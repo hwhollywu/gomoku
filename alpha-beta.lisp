@@ -1,7 +1,7 @@
 ;; ====================================
 ;;  CMPU-365, Spring 2017
-;;  alpha-beta-for-chess.lisp
-;;  Feb. 28, 2017
+;;  alpha-beta.lisp
+;;  Lilian Zhao and Hao Wu
 ;; ====================================
 
 ;;  COMPUTE-MOVE
@@ -32,7 +32,7 @@
 		 (stats-num-moves-done statty)))
       (format t "   BEST MOVE: ~A~%" best-move)
       best-move))))
-   
+
 
 ;;  COMPUTE-MAX / COMPUTE-MIN
 ;; ---------------------------------------------------------------
@@ -62,7 +62,7 @@
      ;; Recursive Case:  Need to do minimax with alpha-beta pruning
      (t
       (let* ((moves (gomoku-legal-moves g))
-      (orig-legal-moves (copy-list moves))) 
+	     (orig-legal-moves (copy-list moves))) 
 	(incf (stats-num-potential-moves statty) (length moves))
 	(dolist (mv moves)
 	  (incf (stats-num-moves-done statty))
@@ -80,13 +80,13 @@
 		;; Hey! PRUNE!  Forget about any remaining moves in 
 		;;  this DOLIST... We're outta here!!
 		(return-from compute-max 
-		  ;; Need to return BEST-MOVE if we're at depth 0
-		  ;; Otherwise return ALPHA value
-		  (cond ((zerop curr-depth)
-			 (format t "   ROOT NODE ALPHA: ~A~%" alpha)
-			 best-move-so-far)
-			(t
-			 alpha)))))))
+			     ;; Need to return BEST-MOVE if we're at depth 0
+			     ;; Otherwise return ALPHA value
+			     (cond ((zerop curr-depth)
+				    (format t "   ROOT NODE ALPHA: ~A~%" alpha)
+				    best-move-so-far)
+				   (t
+				    alpha)))))))
 	;; return alpha or best-move-so-far, depending on whether
 	;; we're at depth 0 or not
 	(cond
@@ -122,7 +122,7 @@
    ;; Otherwise, we need to use recursion!
    (t
     (let* ((moves (gomoku-legal-moves g))
-    	(orig-legal-moves (copy-list moves))) 
+	   (orig-legal-moves (copy-list moves))) 
       (incf (stats-num-potential-moves statty) (length moves))
       (dolist (mv moves)
 	(incf (stats-num-moves-done statty))

@@ -1,7 +1,8 @@
 ;; ===========================================
 ;;  CMPU-365, Spring 2017
 ;;  Basic Definitions for GOMOKU
-;; ===========================================
+;;  Lilian Zhao and Hao Wu
+;; ===========================================;; 
 
 (defconstant *black* -1)
 (defconstant *white* 1)
@@ -15,12 +16,12 @@
 
 
 (defparameter *list-o-files* 
-    (list "basic-defns"        
-	  "gomoku-macros"
-    "gomoku"     
+  (list "basic-defns"        
+	"gomoku-macros"
+	"gomoku"     
 	"mcts"
-    "alpha-beta"
-    "testing")) 
+	"alpha-beta"
+	"testing")) 
 
 ;;  MAKER
 ;; ------------------------------------------------
