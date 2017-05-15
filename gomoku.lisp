@@ -707,7 +707,7 @@
 	     (* *block-three* (aref count 0 1 2))
 	     (* *block-four* (aref count 0 1 3))
 	     (* *five* 
-		(+ (aref count 0 0 4) (aref count 0 1 4) (aref count 0 1 4)))))
+		(+ (aref count 0 0 4) (aref count 0 1 4) (aref count 0 2 4)))))
 	 (white-score
 	  (+ (* *one* (aref count 1 0 0))
 	     (* *two* (aref count 1 0 1))
@@ -718,7 +718,7 @@
 	     (* *block-three* (aref count 1 1 2))
 	     (* *block-four* (aref count 1 1 3))
 	     (* *five* 
-		(+ (aref count 1 0 4) (aref count 1 1 4) (aref count 1 1 4))))))
+		(+ (aref count 1 0 4) (aref count 1 1 4) (aref count 1 2 4))))))
     (- black-score white-score)))
 
 

@@ -20,7 +20,7 @@
 (defconstant *pass* '(nil nil))
 
 
-;;  A POSN is just a number from 0 to 323, that refers to one of the
+;;  A POSN is just a number from 0 to 224, that refers to one of the
 ;;  squares on the 19-by-19 gomoku game board.  The following macros
 ;;  convert between the POSN and ROW/COL representations.
 
