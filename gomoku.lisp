@@ -265,7 +265,7 @@
 	     (row (+ i r-c))
 	     (col (+ j c-c)))
 	;; If the move is legal 
-	(when (is-legal? game row col)
+	(when (is-legal-33 game row col)
 	  ;; add the position array to moves 
 	  (push (list row col) moves))
 	))
@@ -288,7 +288,7 @@
 	(board (gomoku-board game))
 	(current-movs (gomoku-legal-moves game)))
     ;; Case 1: check if it's a legal move when check-legal is true
-    (when (and check-legal? (not (is-legal? game row col)))
+    (when (and check-legal? (not (is-legal-33 game row col)))
       (return-from do-move! game))
     ;; Case 2: when the move is legal OR when we don't need to check
     ;; 1. add the new piece to the board
