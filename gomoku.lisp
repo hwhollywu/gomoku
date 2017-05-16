@@ -358,7 +358,8 @@
 
 (defun do-random-move! (game)
   (let ((chosenmove (random-move game)))
-    (do-move! game nil (first chosenmove) (second chosenmove))))
+    (do-move! game nil (first chosenmove) (second chosenmove))
+    chosenmove))
 
 
 ;;  GAME-OVER?

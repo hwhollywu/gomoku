@@ -19,9 +19,9 @@
   (list "basic-defns"        
 	"gomoku-macros"
 	"gomoku"     
-	"mcts"
-	"alpha-beta"
-	"testing")) 
+	"mctsrave"
+	;;"alpha-beta"
+	"ravetest")) 
 
 ;;  MAKER
 ;; ------------------------------------------------
