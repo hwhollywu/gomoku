@@ -20,7 +20,9 @@
 	"gomoku-macros"
 	"gomoku"     
 	"mctsrave"
-	;;"alpha-beta"
+    "mcts"
+    "alpha-beta"
+    "testing"
 	"ravetest")) 
 
 ;;  MAKER

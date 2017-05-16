@@ -1,4 +1,4 @@
-(defun compete
+(defun compete-rave
     (black-num-sims white-num-sims )
   (let ((g (new-gomoku)))
     (while (not (game-over? g))

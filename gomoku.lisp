@@ -446,15 +446,17 @@
 ;; *SCAN-DIRNS* records the direction we scan: (0 1) represents 
 ;;              scanning horizontally)
 
-(defconstant *scan-starts* (make-array '(6 2) :initial-contents
-          '((0 0) (0 0) (0 0) (1 14) (14 0) (13 14))))
+(defconstant *scan-starts*
+  (make-array '(6 2) :initial-contents
+	      '((0 0) (0 0) (0 0) (1 14) (14 0) (13 14))))
 
-(defconstant *start-dirns* (make-array '(6 2) :initial-contents
-          '((1 0) (0 1) (0 1) (1 0) (0 1) (-1 0))))
+(defconstant *start-dirns*
+  (make-array '(6 2) :initial-contents
+	      '((1 0) (0 1) (0 1) (1 0) (0 1) (-1 0))))
 
-(defconstant *scan-dirns* (make-array '(6 2)
-                                 :initial-contents
-         '((0 1) (1 0) (1 -1) (1 -1) (-1 -1) (-1 -1))))
+(defconstant *scan-dirns*
+  (make-array '(6 2) :initial-contents
+	      '((0 1) (1 0) (1 -1) (1 -1) (-1 -1) (-1 -1))))
 
 ;;  EVAL-HELPER
 ;; ---------------------------------------------------------------------------
@@ -469,7 +471,7 @@
 (defun eval-helper
   (game)
   (let ((board (gomoku-board game))
-    (count (make-array '(2 3 5) : initial-element 0)))
+	(count (make-array '(2 3 5) : initial-element 0)))
     ;; scan the board in 6 directions
     (dotimes (k 6)
       ;; initialize the start point, how to move the start point, 
@@ -483,72 +485,72 @@
         ;; if the start point is not off-board, continue
         ;; (e.g, search from the first row)
         (while (not (off-board? start-r start-c))
-             (let ((curr 0)
-                   (last *border*)
-                   ;; whether the chain is blocked before
-                   ;; since start from the border, initialized as blocked
-                   (beforeblock 1)
-                   ;; whether the chain is blocked after
-                   (afterblock 0)
-                   ;; initialize counter
-                   (counter 1)
-                   ;; initialize position to start point,
-                   (r start-r)
-                   (c start-c))
-                ;; if current position is not off-board, continue.
-                (while (not (off-board? r c))
-                      ;; get current token
-                      (setf curr (aref board r c))
-                      ;; if current token is same as before, 
-                      ;; increment counter
-                      (cond ((= curr last)
-                             (incf counter)
-                             ;; when there are more than 5, set it to 5
-                             (when (> counter 5)
-                             (setf counter 5)))
-                            ;; otherwise update count to record the chain
-                            (t                        
-                              ;; The previous chain is not blocked after
-                              ;; if and only if current token is *BLANK*
-                              (if (= curr *blank*)
-                                  (setf afterblock 0)
-                                  (setf afterblock 1))
-                              ;; update based on the color of the chain
-                              ;; the next chain is blocked before if and
-                              ;; only if the current token is not *BLANK*
-                              (cond ((= last *white*) 
-                                     (incf (aref count 1 
-                                      (+ beforeblock afterblock) 
-                                      (- counter 1)))
-                                     (setf counter 1)
-                                     (setf beforeblock 1))
-                                    ((= last *black*)
-                                     (incf (aref count 0 
-                                      (+ beforeblock afterblock) 
-                                      (- counter 1)))
-                                     (setf counter 1)
-                                     (setf beforeblock 1))
-                                    ((= last *blank*)
-                                     (setf counter 1)                                  
-                                     (setf beforeblock 0)))
-                              ;; update last token to current token
-                              (setf last curr)))
-                      ;; get next token
-                      (setf r (+ r dr))
-                      (setf c (+ c dc)))
-                ;; record the last chain before we hit the border
-                (setf afterblock 1)
-                (cond ((= last *white*) 
-                       (incf (aref count 1
-                       (+ beforeblock afterblock) (- counter 1))))
-                      ((= last *black*)
-                       (incf (aref count 0
-                       (+ beforeblock afterblock) (- counter 1))))))
-             ;; update start point
-             (setf start-r (+ start-r start-dr))
-             (setf start-c (+ start-c start-dc)))))
-  ;; return the 3-d array count
-  count))
+	  (let ((curr 0)
+		(last *border*)
+		;; whether the chain is blocked before
+		;; since start from the border, initialized as blocked
+		(beforeblock 1)
+		;; whether the chain is blocked after
+		(afterblock 0)
+		;; initialize counter
+		(counter 1)
+		;; initialize position to start point,
+		(r start-r)
+		(c start-c))
+	    ;; if current position is not off-board, continue.
+	    (while (not (off-board? r c))
+	      ;; get current token
+	      (setf curr (aref board r c))
+	      ;; if current token is same as before, 
+	      ;; increment counter
+	      (cond ((= curr last)
+		     (incf counter)
+		     ;; when there are more than 5, set it to 5
+		     (when (> counter 5)
+		       (setf counter 5)))
+		    ;; otherwise update count to record the chain
+		    (t                        
+		     ;; The previous chain is not blocked after
+		     ;; if and only if current token is *BLANK*
+		     (if (= curr *blank*)
+			 (setf afterblock 0)
+		       (setf afterblock 1))
+		     ;; update based on the color of the chain
+		     ;; the next chain is blocked before if and
+		     ;; only if the current token is not *BLANK*
+		     (cond ((= last *white*) 
+			    (incf (aref count 1 
+					(+ beforeblock afterblock) 
+					(- counter 1)))
+			    (setf counter 1)
+			    (setf beforeblock 1))
+			   ((= last *black*)
+			    (incf (aref count 0 
+					(+ beforeblock afterblock) 
+					(- counter 1)))
+			    (setf counter 1)
+			    (setf beforeblock 1))
+			   ((= last *blank*)
+			    (setf counter 1)                                  
+			    (setf beforeblock 0)))
+		     ;; update last token to current token
+		     (setf last curr)))
+	      ;; get next token
+	      (setf r (+ r dr))
+	      (setf c (+ c dc)))
+	    ;; record the last chain before we hit the border
+	    (setf afterblock 1)
+	    (cond ((= last *white*) 
+		   (incf (aref count 1
+			       (+ beforeblock afterblock) (- counter 1))))
+		  ((= last *black*)
+		   (incf (aref count 0
+			       (+ beforeblock afterblock) (- counter 1))))))
+	  ;; update start point
+	  (setf start-r (+ start-r start-dr))
+	  (setf start-c (+ start-c start-dc)))))
+    ;; return the 3-d array count
+    count))
 
 
 ;;  EVAL-FUNC
