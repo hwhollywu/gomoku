@@ -311,8 +311,8 @@
   ;; Want to use COPY of GAME struct for simulations...
   ;; That way, can reset game struct before each simulation...
 
-  (let* ((tree (new-mc-tree orig-game))
-	 (hashy (mc-tree-hashy tree)))
+  (let* ((tree (new-ravemc-tree orig-game))
+	 (hashy (ravemc-tree-hashy tree)))
     (dotimes (i num-sims)
       ;;	(format t "~A" i)
       (let* (;; Work with a COPY of the original game struct
